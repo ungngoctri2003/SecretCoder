@@ -71,7 +71,7 @@ export function Footer() {
             </li>
             <li style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <Mail size={20} style={{ flexShrink: 0 }} color="var(--mui-palette-primary-main)" />
-              <span>secretcoder@gmail.com</span>
+              <span>edustart@gmail.com</span>
             </li>
           </Stack>
           <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
@@ -130,7 +130,7 @@ export function Footer() {
         <Box className="container mx-auto max-w-6xl px-4 py-3 text-center text-sm opacity-80">
           ©{' '}
           <MuiLink component={Link} to="/" sx={{ ...footerLinkSx, fontWeight: 500 }}>
-            Secret Coder
+            EduStart
           </MuiLink>
           . {FOOTER.COPYRIGHT}
         </Box>

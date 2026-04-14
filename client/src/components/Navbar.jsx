@@ -185,7 +185,7 @@ export function Navbar() {
                 e.target.style.display = 'none';
               }}
             />
-            Secret
+            Edu
             <Box
               component="span"
               sx={{
@@ -195,7 +195,7 @@ export function Navbar() {
                 backgroundClip: 'text',
               }}
             >
-              Coder
+              Start
             </Box>
           </Button>
         </Box>

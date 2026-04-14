@@ -89,7 +89,7 @@ export function Contact() {
                 </IconTile>
                 <div>
                   <p className="font-semibold">{COMMON.EMAIL}</p>
-                  <p className="text-sm text-base-content/70">secretcoder@gmail.com</p>
+                  <p className="text-sm text-base-content/70">edustart@gmail.com</p>
                 </div>
               </Box>
             </Box>
