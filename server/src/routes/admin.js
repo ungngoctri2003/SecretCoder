@@ -18,7 +18,7 @@ r.get('/users', async (_req, res) => {
 r.patch('/users/:id/role', async (req, res) => {
   const { id } = req.params;
   const { role } = req.body || {};
-  if (!['admin', 'student', 'teacher'].includes(role)) {
+  if (!['admin', 'student'].includes(role)) {
     return res.status(400).json({ error: 'Invalid role' });
   }
   const { data, error } = await supabaseAdmin

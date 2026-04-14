@@ -1,12 +1,47 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Checkbox,
+  Divider,
+  FormControl,
+  FormControlLabel,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { PageHeader } from '../components/PageHeader';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 import { apiFetch } from '../lib/api';
-import { DASH_ADMIN, DASH_TEACHER } from '../strings/vi';
+import { DASH_ADMIN } from '../strings/vi';
 import { COMMON } from '../strings/vi';
 import { ERR } from '../strings/vi';
 
 const TAB_KEYS = ['users', 'contacts', 'categories', 'courses', 'team', 'testimonials'];
+
+function ZebraTable({ children }) {
+  return (
+    <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2, boxShadow: 1 }}>
+      <Table size="small">
+        {children}
+      </Table>
+    </TableContainer>
+  );
+}
 
 export function DashboardAdmin() {
   const { session } = useAuth();
@@ -32,7 +67,6 @@ export function DashboardAdmin() {
     description: '',
     thumbnail_url: '/img/course-1.png',
     category_id: '',
-    teacher_id: '',
     published: true,
     price_cents: 0,
     duration_hours: '',
@@ -44,7 +78,7 @@ export function DashboardAdmin() {
   const [teamForm, setTeamForm] = useState({ name: '', role_title: '', image_url: '', bio: '' });
   const [testForm, setTestForm] = useState({ author_name: '', author_title: '', content: '', rating: 5 });
 
-  async function loadAll() {
+  const loadAll = useCallback(async () => {
     if (!token) return;
     const [u, co, ca, cr, t, te] = await Promise.all([
       apiFetch('/api/admin/users', {}, token),
@@ -60,7 +94,7 @@ export function DashboardAdmin() {
     setCourses(cr || []);
     setTeam(t || []);
     setTestimonials(te || []);
-  }
+  }, [token]);
 
   useEffect(() => {
     let cancelled = false;
@@ -75,7 +109,7 @@ export function DashboardAdmin() {
     return () => {
       cancelled = true;
     };
-  }, [token]);
+  }, [token, loadAll]);
 
   async function updateRole(userId, role) {
     setErr('');
@@ -131,7 +165,6 @@ export function DashboardAdmin() {
             description: courseForm.description || null,
             thumbnail_url: courseForm.thumbnail_url || null,
             category_id: courseForm.category_id || null,
-            teacher_id: courseForm.teacher_id || null,
             published: courseForm.published,
             price_cents: Number(courseForm.price_cents) || 0,
             duration_hours: courseForm.duration_hours === '' ? null : Number(courseForm.duration_hours),
@@ -200,385 +233,347 @@ export function DashboardAdmin() {
     await loadAll();
   }
 
-  const teachers = users.filter((u) => u.role === 'teacher');
+  const rowSx = { '&:nth-of-type(odd)': { bgcolor: 'action.hover' } };
 
   return (
     <>
       <PageHeader title={DASH_ADMIN.TITLE} crumbs={[{ label: DASH_ADMIN.CRUMB, active: true }]} />
       <div className="container mx-auto max-w-6xl px-4 py-12">
         {err ? (
-          <div role="alert" className="alert alert-error">
+          <Alert severity="error" sx={{ mb: 2 }}>
             {err}
-          </div>
+          </Alert>
         ) : null}
         {msg ? (
-          <div role="alert" className="alert alert-success">
+          <Alert severity="success" sx={{ mb: 2 }} onClose={() => setMsg('')}>
             {msg}
-          </div>
+          </Alert>
         ) : null}
 
-        <div role="tablist" className="tabs tabs-boxed mt-6 flex flex-wrap gap-1 bg-base-200 p-2">
+        <Tabs
+          value={tab}
+          onChange={(_, v) => setTab(v)}
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{ mt: 2, bgcolor: 'action.hover', borderRadius: 2, px: 0.5, minHeight: 48 }}
+        >
           {TAB_KEYS.map((k) => (
-            <button
-              key={k}
-              type="button"
-              role="tab"
-              className={`tab tab-sm ${tab === k ? 'tab-active' : ''}`}
-              onClick={() => setTab(k)}
-            >
-              {DASH_ADMIN.TABS[k]}
-            </button>
+            <Tab key={k} value={k} label={DASH_ADMIN.TABS[k]} sx={{ textTransform: 'none', fontWeight: 600 }} />
           ))}
-        </div>
+        </Tabs>
 
-        <div className="mt-8">
+        <Box sx={{ mt: 4 }}>
           {tab === 'users' && (
-            <div className="overflow-x-auto rounded-xl border border-base-300 bg-base-100 shadow">
-              <table className="table table-zebra table-sm">
-                <thead>
-                  <tr>
-                    <th>{DASH_ADMIN.TH_NAME}</th>
-                    <th>{DASH_ADMIN.TH_ID}</th>
-                    <th>{DASH_ADMIN.TH_ROLE}</th>
-                    <th>{DASH_ADMIN.TH_CHANGE}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map((u) => (
-                    <tr key={u.id}>
-                      <td>{u.full_name}</td>
-                      <td>
-                        <code className="text-xs">{u.id}</code>
-                      </td>
-                      <td>{u.role}</td>
-                      <td>
-                        <select
-                          className="select select-bordered select-sm max-w-[140px]"
+            <ZebraTable>
+              <TableHead>
+                <TableRow>
+                  <TableCell>{DASH_ADMIN.TH_NAME}</TableCell>
+                  <TableCell>{DASH_ADMIN.TH_ID}</TableCell>
+                  <TableCell>{DASH_ADMIN.TH_ROLE}</TableCell>
+                  <TableCell>{DASH_ADMIN.TH_CHANGE}</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {users.map((u) => (
+                  <TableRow key={u.id} sx={rowSx}>
+                    <TableCell>{u.full_name}</TableCell>
+                    <TableCell>
+                      <Typography component="code" variant="caption">
+                        {u.id}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>{u.role}</TableCell>
+                    <TableCell>
+                      <FormControl size="small" sx={{ minWidth: 150 }}>
+                        <InputLabel id={`role-${u.id}`} shrink>
+                          {DASH_ADMIN.TH_CHANGE}
+                        </InputLabel>
+                        <Select
+                          labelId={`role-${u.id}`}
+                          label={DASH_ADMIN.TH_CHANGE}
                           value={u.role}
                           onChange={(e) => updateRole(u.id, e.target.value)}
                         >
-                          <option value="student">{DASH_ADMIN.ROLE_STUDENT}</option>
-                          <option value="teacher">{DASH_ADMIN.ROLE_TEACHER}</option>
-                          <option value="admin">{DASH_ADMIN.ROLE_ADMIN}</option>
-                        </select>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                          <MenuItem value="student">{DASH_ADMIN.ROLE_STUDENT}</MenuItem>
+                          <MenuItem value="admin">{DASH_ADMIN.ROLE_ADMIN}</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </ZebraTable>
           )}
 
           {tab === 'contacts' && (
-            <div className="overflow-x-auto rounded-xl border border-base-300 bg-base-100 shadow">
-              <table className="table table-zebra table-sm">
-                <thead>
-                  <tr>
-                    <th>{DASH_ADMIN.TH_DATE}</th>
-                    <th>{DASH_ADMIN.TH_NAME}</th>
-                    <th>{DASH_ADMIN.TH_EMAIL}</th>
-                    <th>{DASH_ADMIN.TH_SUBJECT}</th>
-                    <th>{DASH_ADMIN.TH_MESSAGE}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {contacts.map((c) => (
-                    <tr key={c.id}>
-                      <td className="whitespace-nowrap text-xs">{new Date(c.created_at).toLocaleString()}</td>
-                      <td>{c.name}</td>
-                      <td>{c.email}</td>
-                      <td>{c.subject}</td>
-                      <td className="max-w-[240px] whitespace-pre-wrap text-xs">{c.message}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <ZebraTable>
+              <TableHead>
+                <TableRow>
+                  <TableCell>{DASH_ADMIN.TH_DATE}</TableCell>
+                  <TableCell>{DASH_ADMIN.TH_NAME}</TableCell>
+                  <TableCell>{DASH_ADMIN.TH_EMAIL}</TableCell>
+                  <TableCell>{DASH_ADMIN.TH_SUBJECT}</TableCell>
+                  <TableCell>{DASH_ADMIN.TH_MESSAGE}</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {contacts.map((c) => (
+                  <TableRow key={c.id} sx={rowSx}>
+                    <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                      <Typography variant="caption">{new Date(c.created_at).toLocaleString()}</Typography>
+                    </TableCell>
+                    <TableCell>{c.name}</TableCell>
+                    <TableCell>{c.email}</TableCell>
+                    <TableCell>{c.subject}</TableCell>
+                    <TableCell sx={{ maxWidth: 240, whiteSpace: 'pre-wrap' }}>
+                      <Typography variant="caption">{c.message}</Typography>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </ZebraTable>
           )}
 
           {tab === 'categories' && (
-            <div className="space-y-6">
-              <form className="flex flex-wrap items-end gap-2 rounded-xl border border-base-300 bg-base-100 p-4 shadow" onSubmit={addCategory}>
-                <input
-                  className="input input-bordered input-sm"
-                  placeholder={DASH_ADMIN.PH_NAME}
-                  required
-                  value={catName}
-                  onChange={(e) => setCatName(e.target.value)}
-                />
-                <input
-                  className="input input-bordered input-sm"
-                  placeholder={DASH_ADMIN.PH_SLUG}
-                  required
-                  value={catSlug}
-                  onChange={(e) => setCatSlug(e.target.value)}
-                />
-                <input
-                  className="input input-bordered input-sm flex-1 min-w-[120px]"
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              <Paper component="form" variant="outlined" onSubmit={addCategory} sx={{ p: 2, display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'flex-end' }}>
+                <TextField size="small" placeholder={DASH_ADMIN.PH_NAME} required value={catName} onChange={(e) => setCatName(e.target.value)} />
+                <TextField size="small" placeholder={DASH_ADMIN.PH_SLUG} required value={catSlug} onChange={(e) => setCatSlug(e.target.value)} />
+                <TextField
+                  size="small"
                   placeholder={DASH_ADMIN.PH_IMAGE_URL}
                   value={catImg}
                   onChange={(e) => setCatImg(e.target.value)}
+                  sx={{ flex: '1 1 120px', minWidth: 120 }}
                 />
-                <button type="submit" className="btn btn-primary btn-sm">
+                <Button type="submit" variant="contained" color="primary" size="small">
                   {COMMON.ADD}
-                </button>
-              </form>
-              <ul className="divide-y divide-base-300 rounded-xl border border-base-300 bg-base-100">
-                {categories.map((c) => (
-                  <li key={c.id} className="flex items-center justify-between gap-4 px-4 py-3">
-                    <span>
-                      {c.name} <span className="text-sm text-base-content/60">({c.slug})</span>
-                    </span>
-                    <button type="button" className="btn btn-outline btn-error btn-sm" onClick={() => deleteCategory(c.id)}>
-                      {COMMON.DELETE}
-                    </button>
-                  </li>
+                </Button>
+              </Paper>
+              <Paper variant="outlined">
+                {categories.map((c, i) => (
+                  <Box key={c.id}>
+                    {i > 0 ? <Divider /> : null}
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, px: 2, py: 1.5 }}>
+                      <span>
+                        {c.name}{' '}
+                        <Typography component="span" variant="body2" color="text.secondary">
+                          ({c.slug})
+                        </Typography>
+                      </span>
+                      <Button type="button" variant="outlined" color="error" size="small" onClick={() => deleteCategory(c.id)}>
+                        {COMMON.DELETE}
+                      </Button>
+                    </Box>
+                  </Box>
                 ))}
-              </ul>
-            </div>
+              </Paper>
+            </Box>
           )}
 
           {tab === 'courses' && (
-            <div className="space-y-6">
-              <form className="card border border-base-300 bg-base-100 shadow" onSubmit={addCourse}>
-                <div className="card-body grid gap-3 md:grid-cols-2">
-                  <label className="form-control">
-                    <span className="label-text">{DASH_TEACHER.LABEL_TITLE}</span>
-                    <input
-                      className="input input-bordered input-sm"
-                      required
-                      value={courseForm.title}
-                      onChange={(e) => setCourseForm((f) => ({ ...f, title: e.target.value }))}
-                    />
-                  </label>
-                  <label className="form-control">
-                    <span className="label-text">Slug</span>
-                    <input
-                      className="input input-bordered input-sm"
-                      required
-                      value={courseForm.slug}
-                      onChange={(e) => setCourseForm((f) => ({ ...f, slug: e.target.value }))}
-                    />
-                  </label>
-                  <label className="form-control md:col-span-2">
-                    <span className="label-text">{DASH_TEACHER.LABEL_DESC}</span>
-                    <textarea
-                      className="textarea textarea-bordered textarea-sm"
-                      rows={2}
-                      value={courseForm.description}
-                      onChange={(e) => setCourseForm((f) => ({ ...f, description: e.target.value }))}
-                    />
-                  </label>
-                  <label className="form-control">
-                    <span className="label-text">{DASH_TEACHER.LABEL_CATEGORY}</span>
-                    <select
-                      className="select select-bordered select-sm"
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              <Card variant="outlined" component="form" onSubmit={addCourse}>
+                <CardContent sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' } }}>
+                  <TextField
+                    size="small"
+                    label={DASH_ADMIN.LABEL_COURSE_TITLE}
+                    required
+                    value={courseForm.title}
+                    onChange={(e) => setCourseForm((f) => ({ ...f, title: e.target.value }))}
+                  />
+                  <TextField
+                    size="small"
+                    label="Slug"
+                    required
+                    value={courseForm.slug}
+                    onChange={(e) => setCourseForm((f) => ({ ...f, slug: e.target.value }))}
+                  />
+                  <TextField
+                    size="small"
+                    label={DASH_ADMIN.LABEL_COURSE_DESC}
+                    multiline
+                    rows={2}
+                    value={courseForm.description}
+                    onChange={(e) => setCourseForm((f) => ({ ...f, description: e.target.value }))}
+                    sx={{ gridColumn: { md: '1 / -1' } }}
+                  />
+                  <FormControl size="small">
+                    <InputLabel id="cat-select">{DASH_ADMIN.LABEL_CATEGORY}</InputLabel>
+                    <Select
+                      labelId="cat-select"
+                      label={DASH_ADMIN.LABEL_CATEGORY}
                       value={courseForm.category_id}
                       onChange={(e) => setCourseForm((f) => ({ ...f, category_id: e.target.value }))}
                     >
-                      <option value="">—</option>
+                      <MenuItem value="">—</MenuItem>
                       {categories.map((c) => (
-                        <option key={c.id} value={c.id}>
+                        <MenuItem key={c.id} value={c.id}>
                           {c.name}
-                        </option>
+                        </MenuItem>
                       ))}
-                    </select>
-                  </label>
-                  <label className="form-control">
-                    <span className="label-text">{DASH_ADMIN.LABEL_TEACHER}</span>
-                    <select
-                      className="select select-bordered select-sm"
-                      value={courseForm.teacher_id}
-                      onChange={(e) => setCourseForm((f) => ({ ...f, teacher_id: e.target.value }))}
-                    >
-                      <option value="">—</option>
-                      {teachers.map((t) => (
-                        <option key={t.id} value={t.id}>
-                          {t.full_name} ({t.id.slice(0, 8)}\u2026)
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="form-control md:col-span-2">
-                    <span className="label-text">{DASH_TEACHER.LABEL_THUMB}</span>
-                    <input
-                      className="input input-bordered input-sm"
-                      value={courseForm.thumbnail_url}
-                      onChange={(e) => setCourseForm((f) => ({ ...f, thumbnail_url: e.target.value }))}
-                    />
-                  </label>
-                  <label className="form-control">
-                    <span className="label-text">{DASH_ADMIN.LABEL_PRICE_CENTS}</span>
-                    <input
-                      type="number"
-                      className="input input-bordered input-sm"
-                      value={courseForm.price_cents}
-                      onChange={(e) => setCourseForm((f) => ({ ...f, price_cents: e.target.value }))}
-                    />
-                  </label>
-                  <label className="form-control">
-                    <span className="label-text">{DASH_ADMIN.LABEL_DURATION_H}</span>
-                    <input
-                      className="input input-bordered input-sm"
-                      value={courseForm.duration_hours}
-                      onChange={(e) => setCourseForm((f) => ({ ...f, duration_hours: e.target.value }))}
-                    />
-                  </label>
-                  <label className="form-control">
-                    <span className="label-text">{DASH_ADMIN.LABEL_LEVEL}</span>
-                    <input
-                      className="input input-bordered input-sm"
-                      value={courseForm.level}
-                      onChange={(e) => setCourseForm((f) => ({ ...f, level: e.target.value }))}
-                    />
-                  </label>
-                  <label className="label cursor-pointer justify-start gap-2">
-                    <input
-                      type="checkbox"
-                      className="checkbox checkbox-primary checkbox-sm"
-                      checked={courseForm.published}
-                      onChange={(e) => setCourseForm((f) => ({ ...f, published: e.target.checked }))}
-                    />
-                    <span className="label-text">{DASH_ADMIN.LABEL_PUBLISHED}</span>
-                  </label>
-                  <div className="md:col-span-2">
-                    <button type="submit" className="btn btn-primary btn-sm">
+                    </Select>
+                  </FormControl>
+                  <TextField
+                    size="small"
+                    label={DASH_ADMIN.LABEL_THUMB}
+                    value={courseForm.thumbnail_url}
+                    onChange={(e) => setCourseForm((f) => ({ ...f, thumbnail_url: e.target.value }))}
+                    sx={{ gridColumn: { md: '1 / -1' } }}
+                  />
+                  <TextField
+                    size="small"
+                    type="number"
+                    label={DASH_ADMIN.LABEL_PRICE_CENTS}
+                    value={courseForm.price_cents}
+                    onChange={(e) => setCourseForm((f) => ({ ...f, price_cents: e.target.value }))}
+                  />
+                  <TextField
+                    size="small"
+                    label={DASH_ADMIN.LABEL_DURATION_H}
+                    value={courseForm.duration_hours}
+                    onChange={(e) => setCourseForm((f) => ({ ...f, duration_hours: e.target.value }))}
+                  />
+                  <TextField
+                    size="small"
+                    label={DASH_ADMIN.LABEL_LEVEL}
+                    value={courseForm.level}
+                    onChange={(e) => setCourseForm((f) => ({ ...f, level: e.target.value }))}
+                  />
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={courseForm.published}
+                        onChange={(e) => setCourseForm((f) => ({ ...f, published: e.target.checked }))}
+                        color="primary"
+                      />
+                    }
+                    label={DASH_ADMIN.LABEL_PUBLISHED}
+                    sx={{ gridColumn: { md: '1 / -1' } }}
+                  />
+                  <Box sx={{ gridColumn: { md: '1 / -1' } }}>
+                    <Button type="submit" variant="contained" color="primary" size="small">
                       {DASH_ADMIN.ADD_COURSE}
-                    </button>
-                  </div>
-                </div>
-              </form>
-              <div className="overflow-x-auto rounded-xl border border-base-300 bg-base-100 shadow">
-                <table className="table table-zebra table-sm">
-                  <thead>
-                    <tr>
-                      <th>{DASH_TEACHER.TH_TITLE}</th>
-                      <th>{DASH_TEACHER.TH_SLUG}</th>
-                      <th>{DASH_TEACHER.TH_PUBLISHED}</th>
-                      <th />
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {courses.map((c) => (
-                      <tr key={c.id}>
-                        <td>{c.title}</td>
-                        <td>
-                          <code className="text-xs">{c.slug}</code>
-                        </td>
-                        <td>{c.published ? COMMON.YES : COMMON.NO}</td>
-                        <td>
-                          <button type="button" className="btn btn-outline btn-error btn-xs" onClick={() => deleteCourse(c.id)}>
-                            {COMMON.DELETE}
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+                    </Button>
+                  </Box>
+                </CardContent>
+              </Card>
+              <ZebraTable>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>{DASH_ADMIN.TH_COURSE_TITLE}</TableCell>
+                    <TableCell>{DASH_ADMIN.TH_COURSE_SLUG}</TableCell>
+                    <TableCell>{DASH_ADMIN.TH_COURSE_PUBLISHED}</TableCell>
+                    <TableCell />
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {courses.map((c) => (
+                    <TableRow key={c.id} sx={rowSx}>
+                      <TableCell>{c.title}</TableCell>
+                      <TableCell>
+                        <Typography component="code" variant="caption">
+                          {c.slug}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>{c.published ? COMMON.YES : COMMON.NO}</TableCell>
+                      <TableCell>
+                        <Button type="button" variant="outlined" color="error" size="small" onClick={() => deleteCourse(c.id)}>
+                          {COMMON.DELETE}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </ZebraTable>
+            </Box>
           )}
 
           {tab === 'team' && (
-            <div className="space-y-6">
-              <form className="flex flex-wrap items-end gap-2 rounded-xl border border-base-300 bg-base-100 p-4 shadow" onSubmit={addTeam}>
-                <input
-                  className="input input-bordered input-sm"
-                  placeholder={DASH_ADMIN.PH_NAME}
-                  required
-                  value={teamForm.name}
-                  onChange={(e) => setTeamForm({ ...teamForm, name: e.target.value })}
-                />
-                <input
-                  className="input input-bordered input-sm"
-                  placeholder={DASH_ADMIN.PH_ROLE}
-                  value={teamForm.role_title}
-                  onChange={(e) => setTeamForm({ ...teamForm, role_title: e.target.value })}
-                />
-                <input
-                  className="input input-bordered input-sm"
-                  placeholder={DASH_ADMIN.PH_IMAGE_URL}
-                  value={teamForm.image_url}
-                  onChange={(e) => setTeamForm({ ...teamForm, image_url: e.target.value })}
-                />
-                <input
-                  className="input input-bordered input-sm flex-1 min-w-[100px]"
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              <Paper component="form" variant="outlined" onSubmit={addTeam} sx={{ p: 2, display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'flex-end' }}>
+                <TextField size="small" placeholder={DASH_ADMIN.PH_NAME} required value={teamForm.name} onChange={(e) => setTeamForm({ ...teamForm, name: e.target.value })} />
+                <TextField size="small" placeholder={DASH_ADMIN.PH_ROLE} value={teamForm.role_title} onChange={(e) => setTeamForm({ ...teamForm, role_title: e.target.value })} />
+                <TextField size="small" placeholder={DASH_ADMIN.PH_IMAGE_URL} value={teamForm.image_url} onChange={(e) => setTeamForm({ ...teamForm, image_url: e.target.value })} />
+                <TextField
+                  size="small"
                   placeholder={DASH_ADMIN.PH_BIO}
                   value={teamForm.bio}
                   onChange={(e) => setTeamForm({ ...teamForm, bio: e.target.value })}
+                  sx={{ flex: '1 1 100px', minWidth: 100 }}
                 />
-                <button type="submit" className="btn btn-primary btn-sm">
+                <Button type="submit" variant="contained" color="primary" size="small">
                   {COMMON.ADD}
-                </button>
-              </form>
-              <ul className="divide-y divide-base-300 rounded-xl border border-base-300 bg-base-100">
-                {team.map((m) => (
-                  <li key={m.id} className="flex items-center justify-between gap-4 px-4 py-3">
-                    <span>
-                      {m.name}
-                      {' \u2014 '}
-                      {m.role_title}
-                    </span>
-                    <button type="button" className="btn btn-outline btn-error btn-sm" onClick={() => deleteTeam(m.id)}>
-                      {COMMON.DELETE}
-                    </button>
-                  </li>
+                </Button>
+              </Paper>
+              <Paper variant="outlined">
+                {team.map((m, i) => (
+                  <Box key={m.id}>
+                    {i > 0 ? <Divider /> : null}
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, px: 2, py: 1.5 }}>
+                      <span>
+                        {m.name} — {m.role_title}
+                      </span>
+                      <Button type="button" variant="outlined" color="error" size="small" onClick={() => deleteTeam(m.id)}>
+                        {COMMON.DELETE}
+                      </Button>
+                    </Box>
+                  </Box>
                 ))}
-              </ul>
-            </div>
+              </Paper>
+            </Box>
           )}
 
           {tab === 'testimonials' && (
-            <div className="space-y-6">
-              <form className="flex flex-wrap items-end gap-2 rounded-xl border border-base-300 bg-base-100 p-4 shadow" onSubmit={addTestimonial}>
-                <input
-                  className="input input-bordered input-sm"
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              <Paper component="form" variant="outlined" onSubmit={addTestimonial} sx={{ p: 2, display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'flex-end' }}>
+                <TextField
+                  size="small"
                   placeholder={DASH_ADMIN.PH_AUTHOR}
                   required
                   value={testForm.author_name}
                   onChange={(e) => setTestForm({ ...testForm, author_name: e.target.value })}
                 />
-                <input
-                  className="input input-bordered input-sm"
-                  placeholder={DASH_ADMIN.PH_TITLE}
-                  value={testForm.author_title}
-                  onChange={(e) => setTestForm({ ...testForm, author_title: e.target.value })}
-                />
-                <input
+                <TextField size="small" placeholder={DASH_ADMIN.PH_TITLE} value={testForm.author_title} onChange={(e) => setTestForm({ ...testForm, author_title: e.target.value })} />
+                <TextField
+                  size="small"
                   type="number"
-                  min={1}
-                  max={5}
-                  className="input input-bordered input-sm w-20"
+                  inputProps={{ min: 1, max: 5 }}
+                  sx={{ width: 80 }}
                   value={testForm.rating}
-                  onChange={(e) => setTestForm({ ...testForm, rating: e.target.value })}
+                  onChange={(e) => setTestForm({ ...testForm, rating: Number(e.target.value) })}
                 />
-                <input
-                  className="input input-bordered input-sm flex-1 min-w-[160px]"
+                <TextField
+                  size="small"
                   placeholder={DASH_ADMIN.PH_CONTENT}
                   required
                   value={testForm.content}
                   onChange={(e) => setTestForm({ ...testForm, content: e.target.value })}
+                  sx={{ flex: '1 1 160px', minWidth: 160 }}
                 />
-                <button type="submit" className="btn btn-primary btn-sm">
+                <Button type="submit" variant="contained" color="primary" size="small">
                   {COMMON.ADD}
-                </button>
-              </form>
-              <ul className="divide-y divide-base-300 rounded-xl border border-base-300 bg-base-100">
-                {testimonials.map((t) => (
-                  <li key={t.id} className="flex items-center justify-between gap-4 px-4 py-3">
-                    <span className="text-sm">
-                      {t.author_name}: {t.content.slice(0, 80)}
-                      {t.content.length > 80 ? '\u2026' : ''}
-                    </span>
-                    <button type="button" className="btn btn-outline btn-error btn-sm" onClick={() => deleteTestimonial(t.id)}>
-                      {COMMON.DELETE}
-                    </button>
-                  </li>
+                </Button>
+              </Paper>
+              <Paper variant="outlined">
+                {testimonials.map((t, i) => (
+                  <Box key={t.id}>
+                    {i > 0 ? <Divider /> : null}
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, px: 2, py: 1.5 }}>
+                      <Typography variant="body2">
+                        {t.author_name}: {t.content.slice(0, 80)}
+                        {t.content.length > 80 ? '…' : ''}
+                      </Typography>
+                      <Button type="button" variant="outlined" color="error" size="small" onClick={() => deleteTestimonial(t.id)}>
+                        {COMMON.DELETE}
+                      </Button>
+                    </Box>
+                  </Box>
                 ))}
-              </ul>
-            </div>
+              </Paper>
+            </Box>
           )}
-        </div>
+        </Box>
       </div>
     </>
   );

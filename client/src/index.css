@@ -2,17 +2,11 @@
 
 @import 'tailwindcss';
 
-@plugin "daisyui" {
-  themes:
-    secretcoder --default,
-    secretcoder-dark --prefersdark;
-}
+@theme {
+  --font-sans: 'Heebo', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Nunito', ui-sans-serif, system-ui, sans-serif;
 
-@plugin "daisyui/theme" {
-  name: 'secretcoder';
-  default: true;
-  prefersdark: false;
-  color-scheme: light;
+  /* Palette (trước đây từ DaisyUI theme secretcoder) */
   --color-base-100: oklch(99% 0.002 240);
   --color-base-200: oklch(96% 0.008 240);
   --color-base-300: oklch(90% 0.012 240);
@@ -23,30 +17,8 @@
   --color-secondary-content: oklch(98% 0.01 260);
   --color-accent: oklch(72% 0.17 55);
   --color-accent-content: oklch(100% 0 0);
-  --radius-selector: 0.5rem;
-  --radius-field: 0.5rem;
-  --radius-box: 0.75rem;
-}
-
-@plugin "daisyui/theme" {
-  name: 'secretcoder-dark';
-  prefersdark: true;
-  color-scheme: dark;
-  --color-base-100: oklch(22% 0.03 260);
-  --color-base-200: oklch(18% 0.03 260);
-  --color-base-300: oklch(28% 0.03 260);
-  --color-base-content: oklch(95% 0.01 260);
-  --color-primary: oklch(72% 0.17 55);
-  --color-primary-content: oklch(20% 0.02 260);
-  --color-secondary: oklch(45% 0.06 260);
-  --color-secondary-content: oklch(98% 0.01 260);
-  --color-accent: oklch(72% 0.17 55);
-  --color-accent-content: oklch(20% 0.02 260);
-}
-
-@theme {
-  --font-sans: 'Heebo', ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Nunito', ui-sans-serif, system-ui, sans-serif;
+  --color-neutral: oklch(45% 0.02 260);
+  --color-neutral-content: oklch(98% 0.01 260);
 }
 
 @utility font-display {

@@ -1,5 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { ThemeProvider, CssBaseline } from '@mui/material';
+import { Toaster } from 'sonner';
 import { AuthProvider } from './context/AuthContext';
+import { appTheme } from './theme';
 import { Layout } from './components/Layout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { RoleRoute } from './components/RoleRoute';
@@ -15,14 +18,16 @@ import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { DashboardRedirect } from './pages/DashboardRedirect';
 import { DashboardStudent } from './pages/DashboardStudent';
-import { DashboardTeacher } from './pages/DashboardTeacher';
 import { DashboardAdmin } from './pages/DashboardAdmin';
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <Routes>
+    <ThemeProvider theme={appTheme}>
+      <CssBaseline />
+      <Toaster position="top-center" theme="light" richColors closeButton />
+      <BrowserRouter>
+        <AuthProvider>
+          <Routes>
           <Route element={<Layout />}>
             <Route index element={<Home />} />
             <Route path="about" element={<About />} />
@@ -51,14 +56,6 @@ export default function App() {
               }
             />
             <Route
-              path="dashboard/teacher"
-              element={
-                <RoleRoute roles={['teacher']}>
-                  <DashboardTeacher />
-                </RoleRoute>
-              }
-            />
-            <Route
               path="dashboard/admin"
               element={
                 <RoleRoute roles={['admin']}>
@@ -68,8 +65,9 @@ export default function App() {
             />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
-        </Routes>
-      </AuthProvider>
-    </BrowserRouter>
+          </Routes>
+        </AuthProvider>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }

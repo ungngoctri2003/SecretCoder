@@ -195,30 +195,35 @@ export const TESTI_PAGE = {
 };
 
 export const INSTRUCTOR_PAGE = {
-  TITLE: 'Tr\u1EDF th\xE0nh gi\u1EA3ng vi\xEAn',
-  CRUMB: 'Gi\u1EA3ng vi\xEAn',
-  H2: '\u0110\u0103ng k\xFD l\xE0m gi\u1EA3ng vi\xEAn',
+  TITLE: 'H\u1EE3p t\xE1c \u0111\xE0o t\u1EA1o',
+  CRUMB: 'H\u1EE3p t\xE1c',
+  H2: 'Chia s\u1EBB ki\u1EBFn th\u1EE9c c\xF9ng Secret Coder',
   H3: 'Ch\xE0o m\u1EEBng \u0111\u1EBFn Secret Coder',
   P1:
     'B\u1EA1n \u0111am m\xEA chia s\u1EBB chuy\xEAn m\xF4n v\xE0 t\u1EA1o t\xE1c \u0111\u1ED9ng cho h\u1ECDc vi\xEAn kh\u1EAFp n\u01A1i? H\xE3y gia nh\u1EADp c\u1ED9ng \u0111\u1ED3ng nh\xE0 gi\xE1o v\xEC s\u1EF1 y\xEAu th\xEDch h\u1ECDc t\u1EADp.',
   P2:
-    'B\u1EAFt \u0111\u1EA7u b\u1EB1ng c\xE1ch t\u1EA1o t\xE0i kho\u1EA3n v\xE0 nh\u1EDD qu\u1EA3n tr\u1ECB vi\xEAn n\xE2ng vai tr\xF2 l\xEAn gi\xE1o vi\xEAn. Sau \u0111\xF3 b\u1EA1n c\xF3 th\u1EC3 t\u1EA1o v\xE0 xu\u1EA5t b\u1EA3n kh\xF3a h\u1ECDc t\u1EEB b\u1EA3ng gi\xE1o vi\xEAn.',
+    'B\u1EAFt \u0111\u1EA7u b\u1EB1ng c\xE1ch t\u1EA1o t\xE0i kho\u1EA3n h\u1ECDc vi\xEAn. N\u1ED9i dung v\xE0 kh\xF3a h\u1ECDc do qu\u1EA3n tr\u1ECB vi\xEAn qu\u1EA3n l\xFD; li\xEAn h\u1EC7 \u0111\u1ED9i ng\u0169 n\u1EBFu b\u1EA1n mu\u1ED1n \u0111\u1ED3ng h\xE0nh gi\u1EA3ng d\u1EA1y.',
   CTA: 'T\u1EA1o t\xE0i kho\u1EA3n',
   WHY: 'V\xEC sao gi\u1EA3ng d\u1EA1y c\xF9ng ch\xFAng t\xF4i?',
   WHY_P:
-    'Ti\u1EBFp c\u1EADn h\u1ECDc vi\xEAn to\xE0n c\u1EA7u, d\xF9ng c\xF4ng c\u1EE5 so\u1EA1n b\xE0i v\xE0 theo d\xF5i \u0111\u0103ng k\xFD theo th\u1EDDi gian th\u1EF1c sau khi \u0111\u01B0\u1EE3c duy\u1EC7t l\xE0 gi\xE1o vi\xEAn.',
+    'Ti\u1EBFp c\u1EADn h\u1ECDc vi\xEAn to\xE0n c\u1EA7u v\xE0 \u0111\u1ED3ng h\xE0nh c\xF9ng qu\u1EA3n tr\u1ECB \u0111\u1EC3 x\xE2y n\u1ED9i dung ch\u1EA5t l\u01B0\u1EE3ng tr\xEAn n\u1EC1n t\u1EA3ng c\u1EE7a ch\xFAng t\xF4i.',
 };
 
 export const AUTH = {
   LOGIN_TITLE: '\u0110\u0103ng nh\u1EADp',
   LOGIN_CRUMB: '\u0110\u0103ng nh\u1EADp',
+  LOGIN_LEAD: 'Nh\u1EADp email v\u00E0 m\u1EADt kh\u1EA9u \u0111\u1EC3 v\u00E0o b\u1EA3ng \u0111i\u1EC1u khi\u1EC3n v\u00E0 ti\u1EBFp t\u1EE5c h\u1ECDc.',
   SIGNUP_TITLE: '\u0110\u0103ng k\xFD',
   SIGNUP_CRUMB: '\u0110\u0103ng k\xFD',
+  SIGNUP_LEAD: 'T\u1EA1o t\u00E0i kho\u1EA3n h\u1ECDc vi\u00EAn \u0111\u1EC3 \u0111\u0103ng k\u00FD kh\u00F3a h\u1ECDc v\u00E0 theo d\u00F5i ti\u1EBFn \u0111\u1ED9.',
+  PASSWORD_HINT: 'T\u1ED1i thi\u1EC3u 6 k\u00FD t\u1EF1.',
   CREATE_ACCOUNT: 'T\u1EA1o t\xE0i kho\u1EA3n',
   FULL_NAME: 'H\u1ECD v\xE0 t\xEAn',
   NO_ACCOUNT: 'Ch\u01B0a c\xF3 t\xE0i kho\u1EA3n?',
   HAS_ACCOUNT: '\u0110\xE3 c\xF3 t\xE0i kho\u1EA3n?',
   CHECK_EMAIL: 'Ki\u1EC3m tra email \u0111\u1EC3 x\xE1c nh\u1EADn t\xE0i kho\u1EA3n, sau \u0111\xF3 \u0111\u0103ng nh\u1EADp.',
+  LOGIN_SUCCESS: '\u0110\u0103ng nh\u1EADp th\xE0nh c\xF4ng.',
+  SIGNUP_SUCCESS: '\u0110\u0103ng k\xFD th\xE0nh c\xF4ng.',
 };
 
 export const DASH_STUDENT = {
@@ -227,30 +232,6 @@ export const DASH_STUDENT = {
   TH_COURSE: 'Kh\xF3a h\u1ECDc',
   TH_ENROLLED: 'Ng\xE0y \u0111\u0103ng k\xFD',
   EMPTY: 'B\u1EA1n ch\u01B0a \u0111\u0103ng k\xFD kh\xF3a h\u1ECDc n\xE0o.',
-};
-
-export const DASH_TEACHER = {
-  TITLE: 'B\u1EA3ng gi\xE1o vi\xEAn',
-  VIEW_CATALOG: 'Xem danh m\u1EE5c c\xF4ng khai',
-  CREATE_COURSE: 'T\u1EA1o kh\xF3a h\u1ECDc',
-  LABEL_TITLE: 'Ti\xEAu \u0111\u1EC1',
-  LABEL_SLUG: 'Slug (t\xF9y ch\u1ECDn)',
-  SLUG_PLACEHOLDER: 'T\u1EF1 t\u1EA1o n\u1EBFu \u0111\u1EC3 tr\u1ED1ng',
-  LABEL_DESC: 'M\xF4 t\u1EA3',
-  LABEL_CATEGORY: 'Danh m\u1EE5c',
-  LABEL_THUMB: 'URL \u1EA3nh \u0111\u1EA1i di\u1EC7n',
-  LABEL_PUBLISHED: '\u0110\xE3 xu\u1EA5t b\u1EA3n (hi\u1EC3n th\u1ECB tr\xEAn trang)',
-  SAVE_COURSE: 'L\u01B0u kh\xF3a h\u1ECDc',
-  MY_COURSES: 'Kh\xF3a h\u1ECDc c\u1EE7a t\xF4i',
-  TH_TITLE: 'Ti\xEAu \u0111\u1EC1',
-  TH_SLUG: 'Slug',
-  TH_PUBLISHED: 'Xu\u1EA5t b\u1EA3n',
-  TOGGLE_PUBLISH: 'B\u1EADt/t\u1EAFt xu\u1EA5t b\u1EA3n',
-  ENROLL_TITLE: '\u0110\u0103ng k\xFD tr\xEAn kh\xF3a h\u1ECDc c\u1EE7a t\xF4i',
-  TH_STUDENT_ID: 'M\xE3 h\u1ECDc vi\xEAn',
-  TH_ENROLLED: 'Ng\xE0y \u0111\u0103ng k\xFD',
-  NO_ENROLLMENTS: 'Ch\u01B0a c\xF3 \u0111\u0103ng k\xFD.',
-  MSG_CREATED: '\u0110\xE3 t\u1EA1o kh\xF3a h\u1ECDc.',
 };
 
 export const DASH_ADMIN = {
@@ -274,7 +255,6 @@ export const DASH_ADMIN = {
   TH_ROLE: 'Vai tr\xF2',
   TH_CHANGE: 'Thay \u0111\u1ED5i',
   ROLE_STUDENT: 'H\u1ECDc vi\xEAn',
-  ROLE_TEACHER: 'Gi\xE1o vi\xEAn',
   ROLE_ADMIN: 'Qu\u1EA3n tr\u1ECB',
   TH_DATE: 'Ng\xE0y',
   TH_EMAIL: 'Email',
@@ -284,7 +264,13 @@ export const DASH_ADMIN = {
   PH_SLUG: 'slug',
   PH_IMAGE_URL: 'URL \u1EA3nh',
   ADD_COURSE: 'Th\xEAm kh\xF3a h\u1ECDc',
-  LABEL_TEACHER: 'Gi\xE1o vi\xEAn',
+  LABEL_COURSE_TITLE: 'Ti\xEAu \u0111\u1EC1',
+  LABEL_COURSE_DESC: 'M\xF4 t\u1EA3',
+  LABEL_CATEGORY: 'Danh m\u1EE5c',
+  LABEL_THUMB: 'URL \u1EA3nh \u0111\u1EA1i di\u1EC7n',
+  TH_COURSE_TITLE: 'Ti\xEAu \u0111\u1EC1',
+  TH_COURSE_SLUG: 'Slug',
+  TH_COURSE_PUBLISHED: 'Xu\u1EA5t b\u1EA3n',
   LABEL_PRICE_CENTS: 'Gi\xE1 (xu / cents)',
   LABEL_DURATION_H: 'Th\u1EDDi l\u01B0\u1EE3ng (gi\u1EDD)',
   LABEL_LEVEL: 'C\u1EA5p \u0111\u1ED9',

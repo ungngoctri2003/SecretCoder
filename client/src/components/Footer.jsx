@@ -1,101 +1,162 @@
 import { Link } from 'react-router-dom';
 import { MapPin, Phone, Mail, Share2, MessageCircle, PlayCircle, Link2 } from 'lucide-react';
+import { Box, Button, Link as MuiLink, Stack, TextField, Typography } from '@mui/material';
 import { FOOTER, NAV } from '../strings/vi';
+
+const footerLinkSx = {
+  color: 'inherit',
+  opacity: 0.9,
+  textDecoration: 'none',
+  fontSize: '0.875rem',
+  '&:hover': { textDecoration: 'underline', opacity: 1 },
+};
 
 export function Footer() {
   return (
-    <footer className="mt-auto bg-neutral text-neutral-content">
-      <div className="container mx-auto grid max-w-6xl grid-cols-1 gap-10 px-4 py-14 md:grid-cols-3">
+    <Box
+      component="footer"
+      className="mt-auto"
+      sx={{
+        bgcolor: 'neutral.main',
+        color: 'neutral.contrastText',
+      }}
+    >
+      <Box
+        className="container mx-auto max-w-6xl px-4 py-14"
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
+          gap: 5,
+        }}
+      >
         <div>
-          <h3 className="mb-4 font-display text-lg font-bold">{FOOTER.QUICK_LINKS}</h3>
-          <ul className="space-y-2 text-sm opacity-90">
+          <Typography component="h3" className="font-display" sx={{ mb: 2, fontWeight: 700, fontSize: '1.125rem' }}>
+            {FOOTER.QUICK_LINKS}
+          </Typography>
+          <Stack component="ul" spacing={1} sx={{ listStyle: 'none', m: 0, p: 0, opacity: 0.9, fontSize: '0.875rem' }}>
             <li>
-              <Link to="/about" className="link link-hover">
+              <MuiLink component={Link} to="/about" sx={footerLinkSx}>
                 {NAV.ABOUT}
-              </Link>
+              </MuiLink>
             </li>
             <li>
-              <Link to="/contact" className="link link-hover">
+              <MuiLink component={Link} to="/contact" sx={footerLinkSx}>
                 {NAV.CONTACT}
-              </Link>
+              </MuiLink>
             </li>
             <li>
-              <a href="#" className="link link-hover">
+              <MuiLink href="#" sx={footerLinkSx}>
                 {FOOTER.PRIVACY}
-              </a>
+              </MuiLink>
             </li>
             <li>
-              <a href="#" className="link link-hover">
+              <MuiLink href="#" sx={footerLinkSx}>
                 {FOOTER.TERMS}
-              </a>
+              </MuiLink>
             </li>
-          </ul>
+          </Stack>
         </div>
         <div>
-          <h3 className="mb-4 font-display text-lg font-bold">{FOOTER.CONTACT_TITLE}</h3>
-          <ul className="space-y-3 text-sm opacity-90">
-            <li className="flex items-start gap-3">
-              <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+          <Typography component="h3" className="font-display" sx={{ mb: 2, fontWeight: 700, fontSize: '1.125rem' }}>
+            {FOOTER.CONTACT_TITLE}
+          </Typography>
+          <Stack component="ul" spacing={1.5} sx={{ listStyle: 'none', m: 0, p: 0, opacity: 0.9, fontSize: '0.875rem' }}>
+            <li style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+              <MapPin size={20} style={{ marginTop: 2, flexShrink: 0 }} color="var(--mui-palette-primary-main)" />
               <span>{FOOTER.ADDRESS}</span>
             </li>
-            <li className="flex items-center gap-3">
-              <Phone className="h-5 w-5 shrink-0 text-primary" />
+            <li style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <Phone size={20} style={{ flexShrink: 0 }} color="var(--mui-palette-primary-main)" />
               <span>+91 8683045908</span>
             </li>
-            <li className="flex items-center gap-3">
-              <Mail className="h-5 w-5 shrink-0 text-primary" />
+            <li style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <Mail size={20} style={{ flexShrink: 0 }} color="var(--mui-palette-primary-main)" />
               <span>secretcoder@gmail.com</span>
             </li>
-          </ul>
-          <div className="mt-4 flex gap-2">
-            <a href="#" className="btn btn-circle btn-ghost btn-sm border border-neutral-content/30" aria-label={FOOTER.SHARE}>
-              <Share2 className="h-4 w-4" />
-            </a>
-            <a
-              href="#"
-              className="btn btn-circle btn-ghost btn-sm border border-neutral-content/30"
-              aria-label={FOOTER.COMMUNITY}
-            >
-              <MessageCircle className="h-4 w-4" />
-            </a>
-            <a href="#" className="btn btn-circle btn-ghost btn-sm border border-neutral-content/30" aria-label={FOOTER.VIDEO}>
-              <PlayCircle className="h-4 w-4" />
-            </a>
-            <a href="#" className="btn btn-circle btn-ghost btn-sm border border-neutral-content/30" aria-label={FOOTER.LINK}>
-              <Link2 className="h-4 w-4" />
-            </a>
-          </div>
+          </Stack>
+          <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
+            <IconCircleButton label={FOOTER.SHARE} href="#">
+              <Share2 size={16} />
+            </IconCircleButton>
+            <IconCircleButton label={FOOTER.COMMUNITY} href="#">
+              <MessageCircle size={16} />
+            </IconCircleButton>
+            <IconCircleButton label={FOOTER.VIDEO} href="#">
+              <PlayCircle size={16} />
+            </IconCircleButton>
+            <IconCircleButton label={FOOTER.LINK} href="#">
+              <Link2 size={16} />
+            </IconCircleButton>
+          </Stack>
         </div>
         <div>
-          <h3 className="mb-4 font-display text-lg font-bold">{FOOTER.NEWSLETTER}</h3>
-          <p className="mb-4 text-sm opacity-90">{FOOTER.NEWSLETTER_DESC}</p>
-          <form
-            className="join w-full max-w-sm"
+          <Typography component="h3" className="font-display" sx={{ mb: 2, fontWeight: 700, fontSize: '1.125rem' }}>
+            {FOOTER.NEWSLETTER}
+          </Typography>
+          <Typography sx={{ mb: 2, fontSize: '0.875rem', opacity: 0.9 }}>{FOOTER.NEWSLETTER_DESC}</Typography>
+          <Box
+            component="form"
+            className="max-w-sm"
+            sx={{ display: 'flex', width: '100%', gap: 0, alignItems: 'stretch' }}
             onSubmit={(e) => {
               e.preventDefault();
             }}
           >
-            <input
+            <TextField
               type="email"
               placeholder={FOOTER.EMAIL_PLACEHOLDER}
-              className="input input-bordered join-item w-full"
               required
+              size="small"
+              sx={{
+                flex: 1,
+                '& .MuiOutlinedInput-root': {
+                  borderTopRightRadius: 0,
+                  borderBottomRightRadius: 0,
+                },
+              }}
             />
-            <button type="submit" className="btn btn-primary join-item">
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              sx={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0, px: 2, whiteSpace: 'nowrap' }}
+            >
               {FOOTER.SUBSCRIBE}
-            </button>
-          </form>
+            </Button>
+          </Box>
         </div>
-      </div>
-      <div className="border-t border-neutral-content/20">
-        <div className="container mx-auto max-w-6xl px-4 py-6 text-center text-sm opacity-80">
+      </Box>
+      <Box sx={{ borderTop: 1, borderColor: 'rgba(255,255,255,0.2)' }}>
+        <Box className="container mx-auto max-w-6xl px-4 py-3 text-center text-sm opacity-80">
           ©{' '}
-          <Link to="/" className="link link-hover font-medium">
+          <MuiLink component={Link} to="/" sx={{ ...footerLinkSx, fontWeight: 500 }}>
             Secret Coder
-          </Link>
+          </MuiLink>
           . {FOOTER.COPYRIGHT}
-        </div>
-      </div>
-    </footer>
+        </Box>
+      </Box>
+    </Box>
+  );
+}
+
+function IconCircleButton({ children, href, label }) {
+  return (
+    <Button
+      component="a"
+      href={href}
+      aria-label={label}
+      variant="outlined"
+      size="small"
+      sx={{
+        minWidth: 0,
+        p: 1,
+        borderRadius: '50%',
+        borderColor: 'rgba(255,255,255,0.35)',
+        color: 'inherit',
+        '&:hover': { borderColor: 'rgba(255,255,255,0.55)', bgcolor: 'rgba(255,255,255,0.06)' },
+      }}
+    >
+      {children}
+    </Button>
   );
 }

@@ -1,40 +1,73 @@
 import { Link } from 'react-router-dom';
+import { Box, Breadcrumbs, Link as MuiLink, Typography } from '@mui/material';
 import { PAGE } from '../strings/vi';
 
 export function PageHeader({ title, crumbs = [] }) {
   return (
-    <section className="relative overflow-hidden bg-primary text-primary-content">
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.12]"
+    <Box
+      component="section"
+      className="relative overflow-hidden"
+      sx={{
+        bgcolor: 'primary.main',
+        color: 'primary.contrastText',
+      }}
+    >
+      <Box
+        className="pointer-events-none absolute inset-0"
+        sx={{ opacity: 0.12 }}
         style={{
-          backgroundImage: 'radial-gradient(circle at 20% 30%, oklch(100% 0 0), transparent 45%), radial-gradient(circle at 80% 70%, oklch(100% 0 0), transparent 40%)',
+          backgroundImage:
+            'radial-gradient(circle at 20% 30%, oklch(100% 0 0), transparent 45%), radial-gradient(circle at 80% 70%, oklch(100% 0 0), transparent 40%)',
         }}
       />
-      <div className="container relative mx-auto max-w-6xl px-4 py-14 text-center md:py-20">
-        <h1 className="font-display text-5xl font-extrabold leading-[1.08] tracking-tight drop-shadow-sm md:text-6xl lg:text-7xl">
+      <Box className="container relative mx-auto max-w-6xl px-4 py-8 text-center md:py-10">
+        <Typography
+          component="h1"
+          className="font-display"
+          sx={{
+            fontWeight: 800,
+            lineHeight: 1.12,
+            letterSpacing: '-0.02em',
+            textShadow: '0 1px 2px rgba(0,0,0,0.08)',
+            fontSize: { xs: '1.875rem', sm: '2.125rem', md: '2.5rem', lg: '2.75rem' },
+          }}
+        >
           {title}
-        </h1>
-        <div className="breadcrumbs mt-8 justify-center text-base font-medium text-primary-content/90 md:mt-10 md:text-lg">
-          <ul>
-            <li>
-              <Link to="/" className="link link-hover text-primary-content">
-                {PAGE.HOME_CRUMB}
-              </Link>
-            </li>
-            {crumbs.map((c) => (
-              <li key={c.label}>
-                {c.to && !c.active ? (
-                  <Link to={c.to} className="link link-hover text-primary-content">
-                    {c.label}
-                  </Link>
-                ) : (
-                  <span className="opacity-100">{c.label}</span>
-                )}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </section>
+        </Typography>
+        <Breadcrumbs
+          className="mt-3 justify-center md:mt-4"
+          sx={{
+            justifyContent: 'center',
+            '& .MuiBreadcrumbs-separator': { color: 'primary.contrastText', opacity: 0.7 },
+          }}
+        >
+          <MuiLink
+            component={Link}
+            to="/"
+            underline="hover"
+            sx={{ color: 'primary.contrastText', opacity: 0.9, fontWeight: 500, fontSize: { xs: '1rem', md: '1.125rem' } }}
+          >
+            {PAGE.HOME_CRUMB}
+          </MuiLink>
+          {crumbs.map((c) =>
+            c.to && !c.active ? (
+              <MuiLink
+                key={c.label}
+                component={Link}
+                to={c.to}
+                underline="hover"
+                sx={{ color: 'primary.contrastText', opacity: 0.9, fontWeight: 500, fontSize: { xs: '1rem', md: '1.125rem' } }}
+              >
+                {c.label}
+              </MuiLink>
+            ) : (
+              <Typography key={c.label} sx={{ color: 'primary.contrastText', fontWeight: 500, fontSize: { xs: '1rem', md: '1.125rem' } }}>
+                {c.label}
+              </Typography>
+            ),
+          )}
+        </Breadcrumbs>
+      </Box>
+    </Box>
   );
 }

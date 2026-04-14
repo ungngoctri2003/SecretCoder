@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
+import { Fab } from '@mui/material';
 import { ChevronUp } from 'lucide-react';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
@@ -22,14 +23,14 @@ export function Layout() {
       </main>
       <Footer />
       {showTop && (
-        <button
-          type="button"
-          className="btn btn-primary btn-circle fixed bottom-6 right-6 z-40 shadow-lg"
+        <Fab
+          color="primary"
           aria-label={LAYOUT.BACK_TO_TOP}
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          sx={{ position: 'fixed', bottom: 24, right: 24, zIndex: (t) => t.zIndex.tooltip }}
         >
           <ChevronUp className="h-5 w-5" />
-        </button>
+        </Fab>
       )}
     </div>
   );

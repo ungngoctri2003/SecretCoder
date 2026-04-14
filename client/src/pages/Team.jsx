@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Alert, Box, Card, CardContent, Typography } from '@mui/material';
 import { PageHeader } from '../components/PageHeader';
 import { apiFetch } from '../lib/api';
 import { TEAM_PAGE } from '../strings/vi';
@@ -32,26 +33,39 @@ export function Team() {
           <h2 className="font-display mt-2 text-3xl font-bold md:text-4xl">{TEAM_PAGE.H2}</h2>
         </div>
         {err ? (
-          <div role="alert" className="alert alert-error mt-8">
+          <Alert severity="error" sx={{ mt: 4 }}>
             {err}
-          </div>
+          </Alert>
         ) : null}
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {members.map((m) => (
-            <div key={m.id} className="card border border-base-300 bg-base-100 text-center shadow-md">
-              <figure className="px-6 pt-6">
+            <Card key={m.id} variant="outlined" sx={{ textAlign: 'center', boxShadow: 2 }}>
+              <Box sx={{ px: 3, pt: 3 }}>
                 {m.image_url ? (
-                  <img src={m.image_url} alt="" className="mx-auto h-28 w-28 rounded-full object-cover" />
+                  <Box
+                    component="img"
+                    src={m.image_url}
+                    alt=""
+                    sx={{ mx: 'auto', height: 112, width: 112, borderRadius: '50%', objectFit: 'cover', display: 'block' }}
+                  />
                 ) : (
-                  <div className="mx-auto h-28 w-28 rounded-full bg-base-300" />
+                  <Box sx={{ mx: 'auto', height: 112, width: 112, borderRadius: '50%', bgcolor: 'action.selected' }} />
                 )}
-              </figure>
-              <div className="card-body">
-                <h3 className="card-title justify-center text-lg">{m.name}</h3>
-                <p className="text-sm text-base-content/60">{m.role_title}</p>
-                {m.bio ? <p className="text-sm text-base-content/80">{m.bio}</p> : null}
-              </div>
-            </div>
+              </Box>
+              <CardContent>
+                <Typography component="h3" className="font-display text-lg font-bold">
+                  {m.name}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                  {m.role_title}
+                </Typography>
+                {m.bio ? (
+                  <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary' }}>
+                    {m.bio}
+                  </Typography>
+                ) : null}
+              </CardContent>
+            </Card>
           ))}
         </div>
         {!err && members.length === 0 ? (

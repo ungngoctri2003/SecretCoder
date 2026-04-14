@@ -1,4 +1,7 @@
-const base = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+/** Same-origin on Vercel: leave VITE_API_URL unset in production build. */
+const base =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.DEV ? 'http://localhost:4000' : '');
 
 export async function apiFetch(path, options = {}, accessToken = null) {
   const headers = {

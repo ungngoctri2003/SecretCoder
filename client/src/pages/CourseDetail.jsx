@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { Alert, Box, Button, CircularProgress, Link as MuiLink, Typography } from '@mui/material';
 import { PageHeader } from '../components/PageHeader';
 import { apiFetch } from '../lib/api';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 import { COURSE_DETAIL } from '../strings/vi';
 import { COMMON } from '../strings/vi';
 import { ERR } from '../strings/vi';
@@ -62,14 +63,12 @@ export function CourseDetail() {
           title={COURSE_DETAIL.TITLE_FALLBACK}
           crumbs={[{ label: COURSE_DETAIL.CRUMB, to: '/courses' }, { label: slug || '', active: true }]}
         />
-        <div className="container mx-auto max-w-2xl px-4 py-12">
-          <div role="alert" className="alert alert-warning">
-            {err || COMMON.LOADING}
-          </div>
-          <Link to="/courses" className="btn btn-link mt-4 px-0">
+        <Box className="container mx-auto max-w-2xl px-4 py-12">
+          <Alert severity="warning">{err || COMMON.LOADING}</Alert>
+          <Button component={Link} to="/courses" variant="text" color="primary" sx={{ mt: 2, px: 0 }}>
             {COURSE_DETAIL.BACK}
-          </Link>
-        </div>
+          </Button>
+        </Box>
       </>
     );
   }
@@ -81,9 +80,9 @@ export function CourseDetail() {
       <PageHeader title={course.title} crumbs={[{ label: COURSE_DETAIL.CRUMB, to: '/courses' }, { label: course.title, active: true }]} />
       <div className="container mx-auto max-w-6xl px-4 py-12">
         <div className="grid gap-10 md:grid-cols-2">
-          <div className="overflow-hidden rounded-2xl border border-base-300 shadow-lg">
-            <img src={course.thumbnail_url || '/img/course-1.png'} alt="" className="h-full w-full object-cover" />
-          </div>
+          <Box className="overflow-hidden rounded-2xl shadow-lg" sx={{ border: 1, borderColor: 'divider' }}>
+            <Box component="img" src={course.thumbnail_url || '/img/course-1.png'} alt="" sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </Box>
           <div>
             <h2 className="font-display text-3xl font-bold text-primary">{course.title}</h2>
             <p className="mt-4 text-base-content/80">{course.description || COURSE_DETAIL.NO_DESC}</p>
@@ -92,23 +91,23 @@ export function CourseDetail() {
               {course.duration_hours != null ? `${course.duration_hours} ${COMMON.HOURS}` : '—'}
             </p>
             {msg ? (
-              <div role="alert" className={`alert mt-4 ${enrollOk ? 'alert-success' : 'alert-info'}`}>
+              <Alert severity={enrollOk ? 'success' : 'info'} sx={{ mt: 2 }}>
                 {msg}
-              </div>
+              </Alert>
             ) : null}
             {profile?.role === 'student' ? (
-              <button type="button" className="btn btn-primary mt-6" disabled={enrolling} onClick={enroll}>
-                {enrolling ? <span className="loading loading-spinner" /> : null}
+              <Button type="button" variant="contained" color="primary" sx={{ mt: 3 }} disabled={enrolling} onClick={enroll}>
+                {enrolling ? <CircularProgress size={22} color="inherit" sx={{ mr: 1 }} /> : null}
                 {enrolling ? COURSE_DETAIL.ENROLLING : COURSE_DETAIL.ENROLL}
-              </button>
+              </Button>
             ) : null}
             {!session ? (
-              <p className="mt-4 text-sm">
-                <Link to="/login" className="link link-primary">
+              <Typography className="mt-4 text-sm">
+                <MuiLink component={Link} to="/login" fontWeight={600}>
                   {COURSE_DETAIL.LOGIN_LINK}
-                </Link>
+                </MuiLink>
                 {COURSE_DETAIL.LOGIN_SUFFIX}
-              </p>
+              </Typography>
             ) : null}
           </div>
         </div>

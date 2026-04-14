@@ -1,5 +1,6 @@
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { Alert, Box, CircularProgress } from '@mui/material';
+import { useAuth } from '../context/useAuth';
 import { ProtectedRoute } from './ProtectedRoute';
 import { ROLE } from '../strings/vi';
 
@@ -10,15 +11,13 @@ export function RoleRoute({ roles, children }) {
   return (
     <ProtectedRoute>
       {busy ? (
-        <div className="flex min-h-[40vh] items-center justify-center">
-          <span className="loading loading-spinner loading-lg text-primary" />
-        </div>
+        <Box className="flex min-h-[40vh] items-center justify-center">
+          <CircularProgress color="primary" />
+        </Box>
       ) : session && !profile ? (
-        <div className="container mx-auto max-w-2xl px-4 py-10">
-          <div role="alert" className="alert alert-warning">
-            {ROLE.NO_PROFILE}
-          </div>
-        </div>
+        <Box className="container mx-auto max-w-2xl px-4 py-10">
+          <Alert severity="warning">{ROLE.NO_PROFILE}</Alert>
+        </Box>
       ) : roles.includes(profile?.role) ? (
         children
       ) : (

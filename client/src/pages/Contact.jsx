@@ -1,41 +1,59 @@
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { MapPin, Phone, Mail } from 'lucide-react';
+import { Box, Button, Card, CardContent, CircularProgress, TextField, Typography } from '@mui/material';
 import { PageHeader } from '../components/PageHeader';
 import { apiFetch } from '../lib/api';
 import { CONTACT_PAGE } from '../strings/vi';
 import { COMMON } from '../strings/vi';
 import { ERR } from '../strings/vi';
 
+function IconTile({ children }) {
+  return (
+    <Box
+      sx={{
+        flexShrink: 0,
+        width: 48,
+        height: 48,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 2,
+        bgcolor: 'primary.main',
+        color: 'primary.contrastText',
+      }}
+    >
+      {children}
+    </Box>
+  );
+}
+
 export function Contact() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
-  const [status, setStatus] = useState('');
   const [sending, setSending] = useState(false);
 
   async function onSubmit(e) {
     e.preventDefault();
-    setStatus('');
     setSending(true);
     try {
       await apiFetch('/api/contact', {
         method: 'POST',
         body: JSON.stringify({ name, email, subject, message }),
       });
-      setStatus(CONTACT_PAGE.SENT_OK);
+      toast.success(CONTACT_PAGE.SENT_OK);
       setName('');
       setEmail('');
       setSubject('');
       setMessage('');
     } catch (err) {
-      setStatus(err.data?.error || err.message || ERR.SEND_FAILED);
+      toast.error(err.data?.error || err.message || ERR.SEND_FAILED);
     } finally {
       setSending(false);
     }
   }
-
-  const sentOk = status === CONTACT_PAGE.SENT_OK;
 
   return (
     <>
@@ -46,67 +64,65 @@ export function Contact() {
           <div>
             <h3 className="font-display text-xl font-semibold">{CONTACT_PAGE.H3}</h3>
             <p className="mt-3 text-base-content/80">{CONTACT_PAGE.INTRO}</p>
-            <ul className="mt-8 space-y-4">
-              <li className="flex gap-4">
-                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-content">
+            <Box component="ul" sx={{ mt: 4, listStyle: 'none', m: 0, p: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Box component="li" sx={{ display: 'flex', gap: 2 }}>
+                <IconTile>
                   <MapPin className="h-5 w-5" />
-                </span>
+                </IconTile>
                 <div>
                   <p className="font-semibold">{CONTACT_PAGE.OFFICE}</p>
                   <p className="text-sm text-base-content/70">{CONTACT_PAGE.OFFICE_ADDR}</p>
                 </div>
-              </li>
-              <li className="flex gap-4">
-                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-content">
+              </Box>
+              <Box component="li" sx={{ display: 'flex', gap: 2 }}>
+                <IconTile>
                   <Phone className="h-5 w-5" />
-                </span>
+                </IconTile>
                 <div>
                   <p className="font-semibold">{CONTACT_PAGE.MOBILE}</p>
                   <p className="text-sm text-base-content/70">+91 8683045908</p>
                 </div>
-              </li>
-              <li className="flex gap-4">
-                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-content">
+              </Box>
+              <Box component="li" sx={{ display: 'flex', gap: 2 }}>
+                <IconTile>
                   <Mail className="h-5 w-5" />
-                </span>
+                </IconTile>
                 <div>
                   <p className="font-semibold">{COMMON.EMAIL}</p>
                   <p className="text-sm text-base-content/70">secretcoder@gmail.com</p>
                 </div>
-              </li>
-            </ul>
+              </Box>
+            </Box>
           </div>
-          <form className="card border border-base-300 bg-base-100 shadow-lg" onSubmit={onSubmit}>
-            <div className="card-body gap-4">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <label className="form-control w-full">
-                  <span className="label-text">{CONTACT_PAGE.YOUR_NAME}</span>
-                  <input type="text" className="input input-bordered w-full" required value={name} onChange={(e) => setName(e.target.value)} />
-                </label>
-                <label className="form-control w-full">
-                  <span className="label-text">{COMMON.EMAIL}</span>
-                  <input type="email" className="input input-bordered w-full" required value={email} onChange={(e) => setEmail(e.target.value)} />
-                </label>
-              </div>
-              <label className="form-control w-full">
-                <span className="label-text">{CONTACT_PAGE.SUBJECT}</span>
-                <input type="text" className="input input-bordered w-full" value={subject} onChange={(e) => setSubject(e.target.value)} />
-              </label>
-              <label className="form-control w-full">
-                <span className="label-text">{CONTACT_PAGE.MESSAGE}</span>
-                <textarea className="textarea textarea-bordered h-36 w-full" required value={message} onChange={(e) => setMessage(e.target.value)} />
-              </label>
-              {status ? (
-                <div role="alert" className={sentOk ? 'alert alert-success' : 'alert alert-error'}>
-                  {status}
-                </div>
-              ) : null}
-              <button type="submit" className="btn btn-primary w-full" disabled={sending}>
-                {sending ? <span className="loading loading-spinner" /> : null}
+          <Card component="form" onSubmit={onSubmit} variant="outlined" sx={{ boxShadow: 3 }}>
+            <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' } }}>
+                <TextField label={CONTACT_PAGE.YOUR_NAME} required fullWidth value={name} onChange={(e) => setName(e.target.value)} />
+                <TextField
+                  label={COMMON.EMAIL}
+                  type="email"
+                  required
+                  fullWidth
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </Box>
+              <TextField label={CONTACT_PAGE.SUBJECT} fullWidth value={subject} onChange={(e) => setSubject(e.target.value)} />
+              <TextField
+                label={CONTACT_PAGE.MESSAGE}
+                required
+                fullWidth
+                multiline
+                rows={6}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+              />
+              <Button type="submit" variant="contained" color="primary" fullWidth size="large" disabled={sending}>
+                {sending ? <CircularProgress size={22} color="inherit" sx={{ mr: 1 }} /> : null}
                 {sending ? CONTACT_PAGE.SENDING : CONTACT_PAGE.SEND}
-              </button>
-            </div>
-          </form>
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </>

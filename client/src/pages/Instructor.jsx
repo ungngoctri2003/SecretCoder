@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Button } from '@mui/material';
 import { PageHeader } from '../components/PageHeader';
 import { INSTRUCTOR_PAGE } from '../strings/vi';
 
@@ -14,14 +15,14 @@ export function Instructor() {
           <h3 className="font-display text-xl font-semibold">{INSTRUCTOR_PAGE.H3}</h3>
           <p className="mt-4 text-base-content/80">{INSTRUCTOR_PAGE.P1}</p>
           <p className="mt-4 text-base-content/80">{INSTRUCTOR_PAGE.P2}</p>
-          <Link to="/signup" className="btn btn-primary mt-6">
+          <Button component={Link} to="/signup" variant="contained" color="primary" size="large" sx={{ mt: 3 }}>
             {INSTRUCTOR_PAGE.CTA}
-          </Link>
+          </Button>
         </div>
       </div>
       <div className="container mx-auto max-w-6xl px-4 pb-16">
         <div className="grid items-center gap-10 md:grid-cols-2">
-          <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-base-300 shadow-lg">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-2xl shadow-lg" style={{ border: '1px solid var(--color-base-300)' }}>
             <img src="/img/about.jpg" alt="" className="h-full w-full object-cover" />
           </div>
           <div>

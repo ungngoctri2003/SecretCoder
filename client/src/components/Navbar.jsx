@@ -1,126 +1,293 @@
 import { useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { Menu, X, User, ChevronDown, LogOut, LayoutDashboard } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import {
+  AppBar,
+  Toolbar,
+  Box,
+  Button,
+  IconButton,
+  Menu,
+  MenuItem,
+  Collapse,
+  useMediaQuery,
+  useTheme,
+} from '@mui/material';
+import { alpha } from '@mui/material/styles';
+import { Menu as MenuIcon, X, User, ChevronDown, LogOut, LayoutDashboard } from 'lucide-react';
+import { useAuth } from '../context/useAuth';
 import { NAV } from '../strings/vi';
 
-function navClass({ isActive }) {
-  const base =
-    'font-display text-base font-semibold tracking-wide md:text-lg min-h-11 px-3 md:px-4 transition-[color,transform,box-shadow] duration-200';
-  return isActive
-    ? `btn btn-primary ${base} shadow-md shadow-primary/25`
-    : `btn btn-ghost ${base} hover:bg-base-200/80`;
-}
+const navEase = 'cubic-bezier(0.33, 1, 0.68, 1)';
+const navTransition = [
+  `background-color 0.32s ${navEase}`,
+  `color 0.28s ${navEase}`,
+  `box-shadow 0.32s ${navEase}`,
+  `transform 0.22s ${navEase}`,
+].join(', ');
+
+const navButtonSx = {
+  fontFamily: "'Nunito', ui-sans-serif, system-ui, sans-serif",
+  fontWeight: 600,
+  letterSpacing: '0.02em',
+  minHeight: 44,
+  px: { xs: 1.5, md: 2 },
+  fontSize: { xs: '0.95rem', md: '1.05rem' },
+  borderRadius: 2,
+  bgcolor: 'transparent',
+  color: 'text.primary',
+  boxShadow: 'none',
+  transition: navTransition,
+  transform: 'translateZ(0)',
+  '&:hover': {
+    bgcolor: (t) => alpha(t.palette.primary.main, 0.1),
+    boxShadow: 'none',
+    transform: 'translateY(-1px)',
+  },
+  '&:active': {
+    transform: 'translateY(0)',
+    transitionDuration: '0.12s',
+  },
+  '&.active': {
+    bgcolor: 'primary.main',
+    color: 'primary.contrastText',
+    boxShadow: 2,
+    transform: 'translateY(0)',
+    '&:hover': {
+      bgcolor: 'primary.dark',
+      boxShadow: 3,
+    },
+  },
+};
+
+const signOutButtonSx = {
+  ...navButtonSx,
+  '&.active': {},
+  '&:hover': {
+    bgcolor: (t) => alpha(t.palette.error.main, 0.12),
+    boxShadow: 'none',
+    transform: 'translateY(-1px)',
+  },
+};
 
 export function Navbar() {
   const { profile, signOut } = useAuth();
+  const theme = useTheme();
+  const isLg = useMediaQuery(theme.breakpoints.up('lg'));
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [moreAnchor, setMoreAnchor] = useState(null);
 
   const dashPath =
-    profile?.role === 'admin'
-      ? '/dashboard/admin'
-      : profile?.role === 'teacher'
-        ? '/dashboard/teacher'
-        : '/dashboard/student';
+    profile?.role === 'admin' ? '/dashboard/admin' : profile?.role === 'teacher' ? '/dashboard/teacher' : '/dashboard/student';
 
   const closeMobile = () => setMobileOpen(false);
 
-  return (
-    <header className="navbar sticky top-0 z-40 min-h-16 border-b border-base-300 bg-base-100/95 px-3 py-2 shadow-sm backdrop-blur md:px-5">
-      <div className="flex flex-1 items-center">
-        <Link
-          to="/"
-          className="btn btn-ghost gap-2.5 text-2xl font-display font-extrabold tracking-tight normal-case md:text-3xl md:gap-3"
-          onClick={closeMobile}
-        >
-          <img
-            src="/img/icon.png"
-            alt=""
-            className="h-10 w-10 rounded-xl object-cover shadow-md ring-1 ring-base-300/60 md:h-12 md:w-12"
-            onError={(e) => {
-              e.target.style.display = 'none';
-            }}
-          />
-          Secret
-          <span className="bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent">Coder</span>
-        </Link>
-      </div>
-
-      <div className="flex-none lg:hidden">
-        <button
-          type="button"
-          className="btn btn-square btn-ghost"
-          aria-label={mobileOpen ? NAV.CLOSE_MENU : NAV.OPEN_MENU}
-          aria-expanded={mobileOpen}
-          onClick={() => setMobileOpen((v) => !v)}
-        >
-          {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
-      </div>
-
-      <nav
-        className={`absolute left-0 right-0 top-full z-40 flex-col gap-1.5 border-b border-base-300 bg-base-100 p-4 shadow-lg lg:static lg:flex lg:flex-row lg:items-center lg:gap-2 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none ${
-          mobileOpen ? 'flex' : 'hidden lg:flex'
-        }`}
+  const navItems = (
+    <>
+      <Button component={NavLink} to="/" end sx={navButtonSx} onClick={closeMobile}>
+        {NAV.HOME}
+      </Button>
+      <Button component={NavLink} to="/about" sx={navButtonSx} onClick={closeMobile}>
+        {NAV.ABOUT}
+      </Button>
+      <Button component={NavLink} to="/courses" sx={navButtonSx} onClick={closeMobile}>
+        {NAV.COURSES}
+      </Button>
+      <Button
+        sx={navButtonSx}
+        onClick={(e) => setMoreAnchor(e.currentTarget)}
+        endIcon={<ChevronDown size={18} style={{ opacity: 0.75 }} />}
       >
-        <NavLink to="/" end className={navClass} onClick={closeMobile}>
-          {NAV.HOME}
-        </NavLink>
-        <NavLink to="/about" className={navClass} onClick={closeMobile}>
-          {NAV.ABOUT}
-        </NavLink>
-        <NavLink to="/courses" className={navClass} onClick={closeMobile}>
-          {NAV.COURSES}
-        </NavLink>
-
-        <div className="dropdown dropdown-end lg:dropdown-bottom">
-          <div tabIndex={0} role="button" className="btn btn-ghost min-h-11 gap-1.5 px-3 font-display text-base font-semibold tracking-wide md:px-4 md:text-lg">
-            {NAV.MORE}
-            <ChevronDown className="h-5 w-5 opacity-70" />
-          </div>
-          <ul
-            tabIndex={0}
-            className="menu dropdown-content z-50 mt-2 w-52 rounded-box border border-base-300 bg-base-100 p-2 shadow-lg"
+        {NAV.MORE}
+      </Button>
+      <Menu
+        anchorEl={moreAnchor}
+        open={Boolean(moreAnchor)}
+        onClose={() => setMoreAnchor(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        slotProps={{
+          transition: { timeout: 240 },
+          paper: {
+            elevation: 3,
+            sx: {
+              borderRadius: 2,
+              mt: 0.5,
+              overflow: 'hidden',
+              '& .MuiMenuItem-root': {
+                transition: `background-color 0.22s ${navEase}, color 0.22s ${navEase}`,
+              },
+            },
+          },
+        }}
+      >
+        <MenuItem
+          component={Link}
+          to="/team"
+          onClick={() => {
+            setMoreAnchor(null);
+            closeMobile();
+          }}
+        >
+          {NAV.TEAM}
+        </MenuItem>
+        <MenuItem
+          component={Link}
+          to="/testimonials"
+          onClick={() => {
+            setMoreAnchor(null);
+            closeMobile();
+          }}
+        >
+          {NAV.TESTIMONIALS}
+        </MenuItem>
+      </Menu>
+      <Button component={NavLink} to="/contact" sx={navButtonSx} onClick={closeMobile}>
+        {NAV.CONTACT}
+      </Button>
+      {profile ? (
+        <>
+          <Button component={NavLink} to={dashPath} sx={navButtonSx} onClick={closeMobile} startIcon={<LayoutDashboard size={18} />}>
+            {NAV.DASHBOARD}
+          </Button>
+          <Button
+            color="error"
+            sx={signOutButtonSx}
+            onClick={() => signOut()}
+            startIcon={<LogOut size={18} />}
           >
-            <li>
-              <NavLink to="/team" onClick={closeMobile}>
-                {NAV.TEAM}
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/testimonials" onClick={closeMobile}>
-                {NAV.TESTIMONIALS}
-              </NavLink>
-            </li>
-          </ul>
-        </div>
+            {NAV.SIGN_OUT}
+          </Button>
+        </>
+      ) : (
+        <Button component={NavLink} to="/login" sx={navButtonSx} onClick={closeMobile} startIcon={<User size={18} />}>
+          {NAV.SIGN_IN}
+        </Button>
+      )}
+    </>
+  );
 
-        <NavLink to="/contact" className={navClass} onClick={closeMobile}>
-          {NAV.CONTACT}
-        </NavLink>
-
-        {profile ? (
-          <>
-            <NavLink to={dashPath} className={navClass} onClick={closeMobile}>
-              <LayoutDashboard className="h-5 w-5 shrink-0" />
-              {NAV.DASHBOARD}
-            </NavLink>
-            <button
-              type="button"
-              className="btn btn-ghost min-h-11 gap-2 px-3 font-display text-base font-semibold tracking-wide text-error md:px-4 md:text-lg"
-              onClick={() => signOut()}
+  return (
+    <AppBar
+      position="sticky"
+      color="inherit"
+      elevation={0}
+      sx={{
+        zIndex: (t) => t.zIndex.drawer + 1,
+        borderBottom: 1,
+        borderColor: 'divider',
+        bgcolor: 'background.paper',
+        backdropFilter: 'blur(8px)',
+        backgroundImage: 'linear-gradient(rgba(255,255,255,0.92), rgba(255,255,255,0.92))',
+        transition: `border-color 0.35s ${navEase}, box-shadow 0.35s ${navEase}`,
+      }}
+    >
+      <Toolbar
+        sx={{
+          minHeight: { xs: 56, md: 64 },
+          px: { xs: 1.5, md: 2.5 },
+          gap: 1,
+          flexWrap: 'wrap',
+          alignItems: 'center',
+        }}
+      >
+        <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
+          <Button
+            component={Link}
+            to="/"
+            onClick={closeMobile}
+            sx={{
+              textTransform: 'none',
+              gap: { xs: 1.25, md: 1.5 },
+              fontFamily: "'Nunito', ui-sans-serif, system-ui, sans-serif",
+              fontWeight: 800,
+              fontSize: { xs: '1.35rem', md: '1.75rem' },
+              letterSpacing: '-0.02em',
+              color: 'text.primary',
+              borderRadius: 2,
+              transition: `opacity 0.25s ${navEase}, transform 0.28s ${navEase}`,
+              '&:hover': { opacity: 0.92, transform: 'scale(1.01)' },
+              '&:active': { transform: 'scale(0.995)', transitionDuration: '0.1s' },
+            }}
+          >
+            <Box
+              component="img"
+              src="/img/icon.png"
+              alt=""
+              sx={{
+                width: { xs: 40, md: 48 },
+                height: { xs: 40, md: 48 },
+                borderRadius: 2,
+                objectFit: 'cover',
+                boxShadow: 2,
+                border: 1,
+                borderColor: 'divider',
+                transition: `box-shadow 0.3s ${navEase}, transform 0.3s ${navEase}`,
+                '.MuiButtonBase-root:hover &': {
+                  boxShadow: 4,
+                  transform: 'rotate(-2deg) scale(1.03)',
+                },
+              }}
+              onError={(e) => {
+                e.target.style.display = 'none';
+              }}
+            />
+            Secret
+            <Box
+              component="span"
+              sx={{
+                background: (t) => `linear-gradient(135deg, ${t.palette.primary.main}, ${t.palette.secondary.main})`,
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
             >
-              <LogOut className="h-5 w-5" />
-              {NAV.SIGN_OUT}
-            </button>
-          </>
-        ) : (
-          <NavLink to="/login" className={navClass} onClick={closeMobile}>
-            <User className="h-5 w-5 shrink-0" />
-            {NAV.SIGN_IN}
-          </NavLink>
+              Coder
+            </Box>
+          </Button>
+        </Box>
+
+        {!isLg && (
+          <IconButton
+            edge="end"
+            aria-label={mobileOpen ? NAV.CLOSE_MENU : NAV.OPEN_MENU}
+            aria-expanded={mobileOpen}
+            onClick={() => setMobileOpen((v) => !v)}
+            sx={{
+              color: 'text.primary',
+              borderRadius: 2,
+              transition: `background-color 0.25s ${navEase}, transform 0.22s ${navEase}`,
+              '&:hover': {
+                bgcolor: (t) => alpha(t.palette.primary.main, 0.08),
+                transform: 'scale(1.06)',
+              },
+            }}
+          >
+            {mobileOpen ? <X size={22} /> : <MenuIcon size={22} />}
+          </IconButton>
         )}
-      </nav>
-    </header>
+
+        {isLg ? (
+          <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 0.75 }}>{navItems}</Box>
+        ) : (
+          <Collapse in={mobileOpen} timeout={280} unmountOnExit sx={{ width: '100%' }}>
+            <Box
+              sx={{
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'stretch',
+                gap: 0.5,
+                pb: 1,
+                borderTop: 1,
+                borderColor: 'divider',
+                pt: 1,
+              }}
+            >
+              {navItems}
+            </Box>
+          </Collapse>
+        )}
+      </Toolbar>
+    </AppBar>
   );
 }

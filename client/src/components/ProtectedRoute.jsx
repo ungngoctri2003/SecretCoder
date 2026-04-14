@@ -1,5 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { Box, CircularProgress } from '@mui/material';
+import { useAuth } from '../context/useAuth';
 
 export function ProtectedRoute({ children }) {
   const { session, loading } = useAuth();
@@ -7,9 +8,9 @@ export function ProtectedRoute({ children }) {
 
   if (loading) {
     return (
-      <div className="flex min-h-[40vh] items-center justify-center">
-        <span className="loading loading-spinner loading-lg text-primary" />
-      </div>
+      <Box className="flex min-h-[40vh] items-center justify-center">
+        <CircularProgress color="primary" />
+      </Box>
     );
   }
   if (!session) {
