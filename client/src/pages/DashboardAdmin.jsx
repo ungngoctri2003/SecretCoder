@@ -31,7 +31,11 @@ import { DASH_ADMIN } from '../strings/vi';
 import { COMMON } from '../strings/vi';
 import { ERR } from '../strings/vi';
 
-const TAB_KEYS = ['users', 'contacts', 'categories', 'courses', 'team', 'testimonials'];
+const TAB_KEYS = ['users', 'courses'];
+
+const DEFAULT_QUIZ_JSON = `[
+  {"question": "2 + 2 bằng mấy?", "options": ["3", "4", "5"], "correctIndex": 1}
+]`;
 
 function ZebraTable({ children }) {
   return (
@@ -49,15 +53,8 @@ export function DashboardAdmin() {
   const [tab, setTab] = useState('users');
 
   const [users, setUsers] = useState([]);
-  const [contacts, setContacts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [courses, setCourses] = useState([]);
-  const [team, setTeam] = useState([]);
-  const [testimonials, setTestimonials] = useState([]);
-
-  const [catName, setCatName] = useState('');
-  const [catSlug, setCatSlug] = useState('');
-  const [catImg, setCatImg] = useState('');
 
   const [courseForm, setCourseForm] = useState({
     title: '',
@@ -73,33 +70,45 @@ export function DashboardAdmin() {
     learners_count: '',
   });
 
-  const [teamForm, setTeamForm] = useState({ name: '', role_title: '', image_url: '', bio: '' });
-  const [testForm, setTestForm] = useState({ author_name: '', author_title: '', content: '', rating: 5 });
+  const [selectedCourseId, setSelectedCourseId] = useState('');
+  const [courseSubTab, setCourseSubTab] = useState('lectures');
+  const [lectures, setLectures] = useState([]);
+  const [quizzes, setQuizzes] = useState([]);
+  const [lectureForm, setLectureForm] = useState({ title: '', content: '', video_url: '' });
+  const [quizForm, setQuizForm] = useState({ title: '', description: '', questionsJson: DEFAULT_QUIZ_JSON });
 
-  const loadAll = useCallback(async () => {
+  const loadUsersCourses = useCallback(async () => {
     if (!token) return;
-    const [u, co, ca, cr, t, te] = await Promise.all([
+    const [u, ca, cr] = await Promise.all([
       apiFetch('/api/admin/users', {}, token),
-      apiFetch('/api/admin/contact-messages', {}, token),
       apiFetch('/api/categories'),
       apiFetch('/api/admin/courses', {}, token),
-      apiFetch('/api/team'),
-      apiFetch('/api/testimonials'),
     ]);
     setUsers(u || []);
-    setContacts(co || []);
     setCategories(ca || []);
     setCourses(cr || []);
-    setTeam(t || []);
-    setTestimonials(te || []);
   }, [token]);
+
+  const loadLecturesQuizzes = useCallback(async () => {
+    if (!token || !selectedCourseId) {
+      setLectures([]);
+      setQuizzes([]);
+      return;
+    }
+    const [lec, qz] = await Promise.all([
+      apiFetch(`/api/admin/courses/${selectedCourseId}/lectures`, {}, token),
+      apiFetch(`/api/admin/courses/${selectedCourseId}/quizzes`, {}, token),
+    ]);
+    setLectures(lec || []);
+    setQuizzes(qz || []);
+  }, [token, selectedCourseId]);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
         if (!token) return;
-        await loadAll();
+        await loadUsersCourses();
       } catch (e) {
         if (!cancelled) toast.error(e.message || ERR.LOAD_FAILED);
       }
@@ -107,42 +116,39 @@ export function DashboardAdmin() {
     return () => {
       cancelled = true;
     };
-  }, [token, loadAll]);
+  }, [token, loadUsersCourses]);
+
+  useEffect(() => {
+    if (courses.length === 0) {
+      setSelectedCourseId('');
+      return;
+    }
+    setSelectedCourseId((prev) => {
+      if (prev && courses.some((c) => c.id === prev)) return prev;
+      return courses[0].id;
+    });
+  }, [courses]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        if (!token || !selectedCourseId) return;
+        await loadLecturesQuizzes();
+      } catch (e) {
+        if (!cancelled) toast.error(e.message || ERR.LOAD_FAILED);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [token, selectedCourseId, loadLecturesQuizzes]);
 
   async function updateRole(userId, role) {
     try {
       await apiFetch(`/api/admin/users/${userId}/role`, { method: 'PATCH', body: JSON.stringify({ role }) }, token);
       toast.success(DASH_ADMIN.ROLE_UPDATED);
-      await loadAll();
-    } catch (e) {
-      toast.error(e.data?.error || e.message);
-    }
-  }
-
-  async function addCategory(e) {
-    e.preventDefault();
-    try {
-      await apiFetch(
-        '/api/admin/categories',
-        { method: 'POST', body: JSON.stringify({ name: catName, slug: catSlug, image_url: catImg || null }) },
-        token,
-      );
-      setCatName('');
-      setCatSlug('');
-      setCatImg('');
-      toast.success(DASH_ADMIN.TOAST_CAT_ADDED);
-      await loadAll();
-    } catch (e) {
-      toast.error(e.data?.error || e.message);
-    }
-  }
-
-  async function deleteCategory(id) {
-    if (!confirm(DASH_ADMIN.CONFIRM_DEL_CAT)) return;
-    try {
-      await apiFetch(`/api/admin/categories/${id}`, { method: 'DELETE' }, token);
-      toast.success(DASH_ADMIN.TOAST_DELETED);
-      await loadAll();
+      await loadUsersCourses();
     } catch (e) {
       toast.error(e.data?.error || e.message);
     }
@@ -172,7 +178,7 @@ export function DashboardAdmin() {
         token,
       );
       toast.success(DASH_ADMIN.COURSE_CREATED);
-      await loadAll();
+      await loadUsersCourses();
     } catch (e) {
       toast.error(e.data?.error || e.message);
     }
@@ -183,57 +189,88 @@ export function DashboardAdmin() {
     try {
       await apiFetch(`/api/admin/courses/${id}`, { method: 'DELETE' }, token);
       toast.success(DASH_ADMIN.TOAST_DELETED);
-      await loadAll();
+      await loadUsersCourses();
     } catch (e) {
       toast.error(e.data?.error || e.message);
     }
   }
 
-  async function addTeam(e) {
+  async function addLecture(e) {
     e.preventDefault();
-    try {
-      await apiFetch('/api/admin/team', { method: 'POST', body: JSON.stringify(teamForm) }, token);
-      setTeamForm({ name: '', role_title: '', image_url: '', bio: '' });
-      toast.success(DASH_ADMIN.TOAST_TEAM_ADDED);
-      await loadAll();
-    } catch (e) {
-      toast.error(e.data?.error || e.message);
-    }
-  }
-
-  async function deleteTeam(id) {
-    if (!confirm(DASH_ADMIN.CONFIRM_DEL)) return;
-    try {
-      await apiFetch(`/api/admin/team/${id}`, { method: 'DELETE' }, token);
-      toast.success(DASH_ADMIN.TOAST_DELETED);
-      await loadAll();
-    } catch (e) {
-      toast.error(e.data?.error || e.message);
-    }
-  }
-
-  async function addTestimonial(e) {
-    e.preventDefault();
+    if (!selectedCourseId) return;
     try {
       await apiFetch(
-        '/api/admin/testimonials',
-        { method: 'POST', body: JSON.stringify({ ...testForm, rating: Number(testForm.rating) }) },
+        `/api/admin/courses/${selectedCourseId}/lectures`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            title: lectureForm.title,
+            content: lectureForm.content || null,
+            video_url: lectureForm.video_url || null,
+          }),
+        },
         token,
       );
-      setTestForm({ author_name: '', author_title: '', content: '', rating: 5 });
-      toast.success(DASH_ADMIN.TOAST_TEST_ADDED);
-      await loadAll();
+      setLectureForm({ title: '', content: '', video_url: '' });
+      toast.success(DASH_ADMIN.TOAST_LECTURE_ADDED);
+      await loadLecturesQuizzes();
     } catch (e) {
       toast.error(e.data?.error || e.message);
     }
   }
 
-  async function deleteTestimonial(id) {
-    if (!confirm(DASH_ADMIN.CONFIRM_DEL)) return;
+  async function deleteLecture(id) {
+    if (!confirm(DASH_ADMIN.CONFIRM_DEL_LECTURE)) return;
     try {
-      await apiFetch(`/api/admin/testimonials/${id}`, { method: 'DELETE' }, token);
+      await apiFetch(`/api/admin/lectures/${id}`, { method: 'DELETE' }, token);
       toast.success(DASH_ADMIN.TOAST_DELETED);
-      await loadAll();
+      await loadLecturesQuizzes();
+    } catch (e) {
+      toast.error(e.data?.error || e.message);
+    }
+  }
+
+  async function addQuiz(e) {
+    e.preventDefault();
+    if (!selectedCourseId) return;
+    let questions;
+    try {
+      questions = JSON.parse(quizForm.questionsJson || '[]');
+    } catch {
+      toast.error(ERR.INVALID_JSON);
+      return;
+    }
+    if (!Array.isArray(questions)) {
+      toast.error(ERR.INVALID_JSON);
+      return;
+    }
+    try {
+      await apiFetch(
+        `/api/admin/courses/${selectedCourseId}/quizzes`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            title: quizForm.title,
+            description: quizForm.description || null,
+            questions,
+          }),
+        },
+        token,
+      );
+      setQuizForm({ title: '', description: '', questionsJson: DEFAULT_QUIZ_JSON });
+      toast.success(DASH_ADMIN.TOAST_QUIZ_ADDED);
+      await loadLecturesQuizzes();
+    } catch (e) {
+      toast.error(e.data?.error || e.message);
+    }
+  }
+
+  async function deleteQuiz(id) {
+    if (!confirm(DASH_ADMIN.CONFIRM_DEL_QUIZ)) return;
+    try {
+      await apiFetch(`/api/admin/quizzes/${id}`, { method: 'DELETE' }, token);
+      toast.success(DASH_ADMIN.TOAST_DELETED);
+      await loadLecturesQuizzes();
     } catch (e) {
       toast.error(e.data?.error || e.message);
     }
@@ -298,72 +335,6 @@ export function DashboardAdmin() {
                 ))}
               </TableBody>
             </ZebraTable>
-          )}
-
-          {tab === 'contacts' && (
-            <ZebraTable>
-              <TableHead>
-                <TableRow>
-                  <TableCell>{DASH_ADMIN.TH_DATE}</TableCell>
-                  <TableCell>{DASH_ADMIN.TH_NAME}</TableCell>
-                  <TableCell>{DASH_ADMIN.TH_EMAIL}</TableCell>
-                  <TableCell>{DASH_ADMIN.TH_SUBJECT}</TableCell>
-                  <TableCell>{DASH_ADMIN.TH_MESSAGE}</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {contacts.map((c) => (
-                  <TableRow key={c.id} sx={rowSx}>
-                    <TableCell sx={{ whiteSpace: 'nowrap' }}>
-                      <Typography variant="caption">{new Date(c.created_at).toLocaleString()}</Typography>
-                    </TableCell>
-                    <TableCell>{c.name}</TableCell>
-                    <TableCell>{c.email}</TableCell>
-                    <TableCell>{c.subject}</TableCell>
-                    <TableCell sx={{ maxWidth: 240, whiteSpace: 'pre-wrap' }}>
-                      <Typography variant="caption">{c.message}</Typography>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </ZebraTable>
-          )}
-
-          {tab === 'categories' && (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-              <Paper component="form" variant="outlined" onSubmit={addCategory} sx={{ p: 2, display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'flex-end' }}>
-                <TextField size="small" placeholder={DASH_ADMIN.PH_NAME} required value={catName} onChange={(e) => setCatName(e.target.value)} />
-                <TextField size="small" placeholder={DASH_ADMIN.PH_SLUG} required value={catSlug} onChange={(e) => setCatSlug(e.target.value)} />
-                <TextField
-                  size="small"
-                  placeholder={DASH_ADMIN.PH_IMAGE_URL}
-                  value={catImg}
-                  onChange={(e) => setCatImg(e.target.value)}
-                  sx={{ flex: '1 1 120px', minWidth: 120 }}
-                />
-                <Button type="submit" variant="contained" color="primary" size="small">
-                  {COMMON.ADD}
-                </Button>
-              </Paper>
-              <Paper variant="outlined">
-                {categories.map((c, i) => (
-                  <Box key={c.id}>
-                    {i > 0 ? <Divider /> : null}
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, px: 2, py: 1.5 }}>
-                      <span>
-                        {c.name}{' '}
-                        <Typography component="span" variant="body2" color="text.secondary">
-                          ({c.slug})
-                        </Typography>
-                      </span>
-                      <Button type="button" variant="outlined" color="error" size="small" onClick={() => deleteCategory(c.id)}>
-                        {COMMON.DELETE}
-                      </Button>
-                    </Box>
-                  </Box>
-                ))}
-              </Paper>
-            </Box>
           )}
 
           {tab === 'courses' && (
@@ -481,91 +452,158 @@ export function DashboardAdmin() {
                   ))}
                 </TableBody>
               </ZebraTable>
-            </Box>
-          )}
 
-          {tab === 'team' && (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-              <Paper component="form" variant="outlined" onSubmit={addTeam} sx={{ p: 2, display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'flex-end' }}>
-                <TextField size="small" placeholder={DASH_ADMIN.PH_NAME} required value={teamForm.name} onChange={(e) => setTeamForm({ ...teamForm, name: e.target.value })} />
-                <TextField size="small" placeholder={DASH_ADMIN.PH_ROLE} value={teamForm.role_title} onChange={(e) => setTeamForm({ ...teamForm, role_title: e.target.value })} />
-                <TextField size="small" placeholder={DASH_ADMIN.PH_IMAGE_URL} value={teamForm.image_url} onChange={(e) => setTeamForm({ ...teamForm, image_url: e.target.value })} />
-                <TextField
-                  size="small"
-                  placeholder={DASH_ADMIN.PH_BIO}
-                  value={teamForm.bio}
-                  onChange={(e) => setTeamForm({ ...teamForm, bio: e.target.value })}
-                  sx={{ flex: '1 1 100px', minWidth: 100 }}
-                />
-                <Button type="submit" variant="contained" color="primary" size="small">
-                  {COMMON.ADD}
-                </Button>
-              </Paper>
-              <Paper variant="outlined">
-                {team.map((m, i) => (
-                  <Box key={m.id}>
-                    {i > 0 ? <Divider /> : null}
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, px: 2, py: 1.5 }}>
-                      <span>
-                        {m.name} — {m.role_title}
-                      </span>
-                      <Button type="button" variant="outlined" color="error" size="small" onClick={() => deleteTeam(m.id)}>
-                        {COMMON.DELETE}
-                      </Button>
-                    </Box>
-                  </Box>
-                ))}
-              </Paper>
-            </Box>
-          )}
+              <Divider sx={{ my: 1 }} />
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                {DASH_ADMIN.COURSE_CONTENT}
+              </Typography>
+              <FormControl size="small" sx={{ maxWidth: 420 }}>
+                <InputLabel id="pick-course">{DASH_ADMIN.PICK_COURSE}</InputLabel>
+                <Select
+                  labelId="pick-course"
+                  label={DASH_ADMIN.PICK_COURSE}
+                  value={selectedCourseId}
+                  onChange={(e) => setSelectedCourseId(e.target.value)}
+                  disabled={courses.length === 0}
+                >
+                  {courses.map((c) => (
+                    <MenuItem key={c.id} value={c.id}>
+                      {c.title}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
 
-          {tab === 'testimonials' && (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-              <Paper component="form" variant="outlined" onSubmit={addTestimonial} sx={{ p: 2, display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'flex-end' }}>
-                <TextField
-                  size="small"
-                  placeholder={DASH_ADMIN.PH_AUTHOR}
-                  required
-                  value={testForm.author_name}
-                  onChange={(e) => setTestForm({ ...testForm, author_name: e.target.value })}
-                />
-                <TextField size="small" placeholder={DASH_ADMIN.PH_TITLE} value={testForm.author_title} onChange={(e) => setTestForm({ ...testForm, author_title: e.target.value })} />
-                <TextField
-                  size="small"
-                  type="number"
-                  inputProps={{ min: 1, max: 5 }}
-                  sx={{ width: 80 }}
-                  value={testForm.rating}
-                  onChange={(e) => setTestForm({ ...testForm, rating: Number(e.target.value) })}
-                />
-                <TextField
-                  size="small"
-                  placeholder={DASH_ADMIN.PH_CONTENT}
-                  required
-                  value={testForm.content}
-                  onChange={(e) => setTestForm({ ...testForm, content: e.target.value })}
-                  sx={{ flex: '1 1 160px', minWidth: 160 }}
-                />
-                <Button type="submit" variant="contained" color="primary" size="small">
-                  {COMMON.ADD}
-                </Button>
-              </Paper>
-              <Paper variant="outlined">
-                {testimonials.map((t, i) => (
-                  <Box key={t.id}>
-                    {i > 0 ? <Divider /> : null}
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, px: 2, py: 1.5 }}>
-                      <Typography variant="body2">
-                        {t.author_name}: {t.content.slice(0, 80)}
-                        {t.content.length > 80 ? '…' : ''}
-                      </Typography>
-                      <Button type="button" variant="outlined" color="error" size="small" onClick={() => deleteTestimonial(t.id)}>
-                        {COMMON.DELETE}
-                      </Button>
+              {selectedCourseId ? (
+                <>
+                  <Tabs
+                    value={courseSubTab}
+                    onChange={(_, v) => setCourseSubTab(v)}
+                    sx={{ borderBottom: 1, borderColor: 'divider' }}
+                  >
+                    <Tab value="lectures" label={DASH_ADMIN.SUBTAB_LECTURES} sx={{ textTransform: 'none', fontWeight: 600 }} />
+                    <Tab value="quizzes" label={DASH_ADMIN.SUBTAB_QUIZZES} sx={{ textTransform: 'none', fontWeight: 600 }} />
+                  </Tabs>
+
+                  {courseSubTab === 'lectures' && (
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+                      <Paper component="form" variant="outlined" onSubmit={addLecture} sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <TextField
+                          size="small"
+                          label={DASH_ADMIN.LECTURE_TITLE}
+                          required
+                          value={lectureForm.title}
+                          onChange={(e) => setLectureForm((f) => ({ ...f, title: e.target.value }))}
+                        />
+                        <TextField
+                          size="small"
+                          label={DASH_ADMIN.LECTURE_CONTENT}
+                          multiline
+                          minRows={2}
+                          value={lectureForm.content}
+                          onChange={(e) => setLectureForm((f) => ({ ...f, content: e.target.value }))}
+                        />
+                        <TextField
+                          size="small"
+                          label={DASH_ADMIN.LECTURE_VIDEO}
+                          value={lectureForm.video_url}
+                          onChange={(e) => setLectureForm((f) => ({ ...f, video_url: e.target.value }))}
+                        />
+                        <Button type="submit" variant="contained" color="primary" size="small" sx={{ alignSelf: 'flex-start' }}>
+                          {DASH_ADMIN.ADD_LECTURE}
+                        </Button>
+                      </Paper>
+                      <ZebraTable>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>{DASH_ADMIN.TH_LECTURE_TITLE}</TableCell>
+                            <TableCell>{DASH_ADMIN.LECTURE_VIDEO}</TableCell>
+                            <TableCell />
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {lectures.map((lec) => (
+                            <TableRow key={lec.id} sx={rowSx}>
+                              <TableCell>{lec.title}</TableCell>
+                              <TableCell sx={{ maxWidth: 200 }}>
+                                <Typography variant="caption" noWrap component="span" title={lec.video_url || ''}>
+                                  {lec.video_url || '—'}
+                                </Typography>
+                              </TableCell>
+                              <TableCell>
+                                <Button type="button" variant="outlined" color="error" size="small" onClick={() => deleteLecture(lec.id)}>
+                                  {COMMON.DELETE}
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </ZebraTable>
                     </Box>
-                  </Box>
-                ))}
-              </Paper>
+                  )}
+
+                  {courseSubTab === 'quizzes' && (
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+                      <Paper component="form" variant="outlined" onSubmit={addQuiz} sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <TextField
+                          size="small"
+                          label={DASH_ADMIN.QUIZ_TITLE}
+                          required
+                          value={quizForm.title}
+                          onChange={(e) => setQuizForm((f) => ({ ...f, title: e.target.value }))}
+                        />
+                        <TextField
+                          size="small"
+                          label={DASH_ADMIN.QUIZ_DESC}
+                          value={quizForm.description}
+                          onChange={(e) => setQuizForm((f) => ({ ...f, description: e.target.value }))}
+                        />
+                        <TextField
+                          size="small"
+                          label={DASH_ADMIN.QUIZ_QUESTIONS_JSON}
+                          helperText={DASH_ADMIN.QUIZ_JSON_HINT}
+                          multiline
+                          minRows={4}
+                          value={quizForm.questionsJson}
+                          onChange={(e) => setQuizForm((f) => ({ ...f, questionsJson: e.target.value }))}
+                          sx={{ fontFamily: 'monospace' }}
+                        />
+                        <Button type="submit" variant="contained" color="primary" size="small" sx={{ alignSelf: 'flex-start' }}>
+                          {DASH_ADMIN.ADD_QUIZ}
+                        </Button>
+                      </Paper>
+                      <ZebraTable>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>{DASH_ADMIN.TH_QUIZ_TITLE}</TableCell>
+                            <TableCell>{DASH_ADMIN.QUIZ_DESC}</TableCell>
+                            <TableCell />
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {quizzes.map((q) => (
+                            <TableRow key={q.id} sx={rowSx}>
+                              <TableCell>{q.title}</TableCell>
+                              <TableCell sx={{ maxWidth: 280 }}>
+                                <Typography variant="body2" color="text.secondary" noWrap title={q.description || ''}>
+                                  {q.description || '—'}
+                                </Typography>
+                              </TableCell>
+                              <TableCell>
+                                <Button type="button" variant="outlined" color="error" size="small" onClick={() => deleteQuiz(q.id)}>
+                                  {COMMON.DELETE}
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </ZebraTable>
+                    </Box>
+                  )}
+                </>
+              ) : (
+                <Typography color="text.secondary">{DASH_ADMIN.PICK_COURSE}</Typography>
+              )}
             </Box>
           )}
         </Box>

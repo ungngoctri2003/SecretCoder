@@ -145,6 +145,120 @@ r.delete('/courses/:id', async (req, res) => {
   res.status(204).send();
 });
 
+// Course lectures
+r.get('/courses/:courseId/lectures', async (req, res) => {
+  const { courseId } = req.params;
+  const { data, error } = await supabaseAdmin
+    .from('course_lectures')
+    .select('*')
+    .eq('course_id', courseId)
+    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: true });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+r.post('/courses/:courseId/lectures', async (req, res) => {
+  const { courseId } = req.params;
+  const body = req.body || {};
+  if (!body.title) return res.status(400).json({ error: 'title required' });
+  const { data, error } = await supabaseAdmin
+    .from('course_lectures')
+    .insert({
+      course_id: courseId,
+      title: body.title,
+      content: body.content ?? null,
+      video_url: body.video_url ?? null,
+      sort_order: body.sort_order ?? 0,
+    })
+    .select()
+    .single();
+  if (error) return res.status(500).json({ error: error.message });
+  res.status(201).json(data);
+});
+
+r.patch('/lectures/:id', async (req, res) => {
+  const patch = {};
+  for (const k of ['title', 'content', 'video_url', 'sort_order']) {
+    if (req.body[k] !== undefined) patch[k] = req.body[k];
+  }
+  const { data, error } = await supabaseAdmin
+    .from('course_lectures')
+    .update(patch)
+    .eq('id', req.params.id)
+    .select()
+    .single();
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+r.delete('/lectures/:id', async (req, res) => {
+  const { error } = await supabaseAdmin.from('course_lectures').delete().eq('id', req.params.id);
+  if (error) return res.status(500).json({ error: error.message });
+  res.status(204).send();
+});
+
+// Course quizzes (questions: JSON array of { question, options[], correctIndex })
+r.get('/courses/:courseId/quizzes', async (req, res) => {
+  const { courseId } = req.params;
+  const { data, error } = await supabaseAdmin
+    .from('course_quizzes')
+    .select('*')
+    .eq('course_id', courseId)
+    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: true });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+r.post('/courses/:courseId/quizzes', async (req, res) => {
+  const { courseId } = req.params;
+  const body = req.body || {};
+  if (!body.title) return res.status(400).json({ error: 'title required' });
+  let questions = body.questions;
+  if (questions === undefined) questions = [];
+  if (!Array.isArray(questions)) return res.status(400).json({ error: 'questions must be an array' });
+  const { data, error } = await supabaseAdmin
+    .from('course_quizzes')
+    .insert({
+      course_id: courseId,
+      title: body.title,
+      description: body.description ?? null,
+      questions,
+      sort_order: body.sort_order ?? 0,
+    })
+    .select()
+    .single();
+  if (error) return res.status(500).json({ error: error.message });
+  res.status(201).json(data);
+});
+
+r.patch('/quizzes/:id', async (req, res) => {
+  const patch = {};
+  for (const k of ['title', 'description', 'questions', 'sort_order']) {
+    if (req.body[k] !== undefined) {
+      if (k === 'questions' && !Array.isArray(req.body[k])) {
+        return res.status(400).json({ error: 'questions must be an array' });
+      }
+      patch[k] = req.body[k];
+    }
+  }
+  const { data, error } = await supabaseAdmin
+    .from('course_quizzes')
+    .update(patch)
+    .eq('id', req.params.id)
+    .select()
+    .single();
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+r.delete('/quizzes/:id', async (req, res) => {
+  const { error } = await supabaseAdmin.from('course_quizzes').delete().eq('id', req.params.id);
+  if (error) return res.status(500).json({ error: error.message });
+  res.status(204).send();
+});
+
 // Team
 r.post('/team', async (req, res) => {
   const { name, role_title, image_url, bio, sort_order } = req.body || {};

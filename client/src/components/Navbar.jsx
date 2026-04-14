@@ -6,14 +6,12 @@ import {
   Box,
   Button,
   IconButton,
-  Menu,
-  MenuItem,
   Collapse,
   useMediaQuery,
   useTheme,
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
-import { Menu as MenuIcon, X, User, ChevronDown, LogOut, LayoutDashboard } from 'lucide-react';
+import { Menu as MenuIcon, X, User, LogOut, LayoutDashboard, ChevronDown } from 'lucide-react';
 import { useAuth } from '../context/useAuth';
 import { NAV } from '../strings/vi';
 
@@ -74,7 +72,6 @@ export function Navbar() {
   const theme = useTheme();
   const isLg = useMediaQuery(theme.breakpoints.up('lg'));
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [moreAnchor, setMoreAnchor] = useState(null);
 
   const dashPath =
     profile?.role === 'admin' ? '/dashboard/admin' : profile?.role === 'teacher' ? '/dashboard/teacher' : '/dashboard/student';
@@ -92,55 +89,12 @@ export function Navbar() {
       <Button component={NavLink} to="/courses" sx={navButtonSx} onClick={closeMobile}>
         {NAV.COURSES}
       </Button>
-      <Button
-        sx={navButtonSx}
-        onClick={(e) => setMoreAnchor(e.currentTarget)}
-        endIcon={<ChevronDown size={18} style={{ opacity: 0.75 }} />}
-      >
-        {NAV.MORE}
+      <Button component={NavLink} to="/team" sx={navButtonSx} onClick={closeMobile}>
+        {NAV.TEAM}
       </Button>
-      <Menu
-        anchorEl={moreAnchor}
-        open={Boolean(moreAnchor)}
-        onClose={() => setMoreAnchor(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        slotProps={{
-          transition: { timeout: 240 },
-          paper: {
-            elevation: 3,
-            sx: {
-              borderRadius: 2,
-              mt: 0.5,
-              overflow: 'hidden',
-              '& .MuiMenuItem-root': {
-                transition: `background-color 0.22s ${navEase}, color 0.22s ${navEase}`,
-              },
-            },
-          },
-        }}
-      >
-        <MenuItem
-          component={Link}
-          to="/team"
-          onClick={() => {
-            setMoreAnchor(null);
-            closeMobile();
-          }}
-        >
-          {NAV.TEAM}
-        </MenuItem>
-        <MenuItem
-          component={Link}
-          to="/testimonials"
-          onClick={() => {
-            setMoreAnchor(null);
-            closeMobile();
-          }}
-        >
-          {NAV.TESTIMONIALS}
-        </MenuItem>
-      </Menu>
+      <Button component={NavLink} to="/testimonials" sx={navButtonSx} onClick={closeMobile}>
+        {NAV.TESTIMONIALS}
+      </Button>
       <Button component={NavLink} to="/contact" sx={navButtonSx} onClick={closeMobile}>
         {NAV.CONTACT}
       </Button>
