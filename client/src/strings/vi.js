@@ -281,4 +281,8 @@ export const DASH_ADMIN = {
   PH_TITLE: 'Ch\u1EE9c danh',
   PH_CONTENT: 'N\u1ED9i dung',
   LEVEL_DEFAULT: 'C\u01A1 b\u1EA3n',
+  TOAST_CAT_ADDED: '\u0110\xE3 th\xEAm danh m\u1EE5c',
+  TOAST_TEAM_ADDED: '\u0110\xE3 th\xEAm th\xE0nh vi\xEAn',
+  TOAST_TEST_ADDED: '\u0110\xE3 th\xEAm \u0111\xE1nh gi\xE1',
+  TOAST_DELETED: '\u0110\xE3 x\xF3a',
 };

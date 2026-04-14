@@ -1,37 +1,32 @@
-import jwt from 'jsonwebtoken';
 import { supabaseAdmin } from '../supabase.js';
 
-const JWT_SECRET = process.env.SUPABASE_JWT_SECRET;
-
+/**
+ * Validates the access token against Supabase Auth (GET /auth/v1/user).
+ * Prefer this over local jwt.verify + SUPABASE_JWT_SECRET so it stays correct when
+ * the project uses asymmetric JWT signing keys or the JWT secret was mis-copied.
+ */
 export async function requireAuth(req, res, next) {
   const header = req.headers.authorization;
   if (!header?.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'Missing or invalid Authorization header' });
   }
   const token = header.slice(7);
-  if (!JWT_SECRET) {
-    return res.status(500).json({ error: 'Server misconfiguration: SUPABASE_JWT_SECRET' });
-  }
-  try {
-    const payload = jwt.verify(token, JWT_SECRET);
-    const userId = payload.sub;
-    if (!userId) {
-      return res.status(401).json({ error: 'Invalid token' });
-    }
-    const { data: profile, error } = await supabaseAdmin
-      .from('profiles')
-      .select('id, full_name, role')
-      .eq('id', userId)
-      .single();
-
-    if (error || !profile) {
-      return res.status(403).json({ error: 'Profile not found' });
-    }
-    req.user = { id: userId, email: payload.email ?? null, ...profile };
-    next();
-  } catch (e) {
+  const { data: authData, error: authError } = await supabaseAdmin.auth.getUser(token);
+  if (authError || !authData?.user?.id) {
     return res.status(401).json({ error: 'Invalid or expired token' });
   }
+  const userId = authData.user.id;
+  const { data: profile, error } = await supabaseAdmin
+    .from('profiles')
+    .select('id, full_name, role')
+    .eq('id', userId)
+    .single();
+
+  if (error || !profile) {
+    return res.status(403).json({ error: 'Profile not found' });
+  }
+  req.user = { id: userId, email: authData.user.email ?? null, ...profile };
+  next();
 }
 
 export function requireRole(...roles) {
@@ -49,20 +44,21 @@ export function requireRole(...roles) {
 /** Optional: attach user if Bearer present, else continue */
 export async function optionalAuth(req, res, next) {
   const header = req.headers.authorization;
-  if (!header?.startsWith('Bearer ') || !JWT_SECRET) {
+  if (!header?.startsWith('Bearer ')) {
     return next();
   }
   const token = header.slice(7);
   try {
-    const payload = jwt.verify(token, JWT_SECRET);
-    const userId = payload.sub;
+    const { data: authData } = await supabaseAdmin.auth.getUser(token);
+    const userId = authData?.user?.id;
+    if (!userId) return next();
     const { data: profile } = await supabaseAdmin
       .from('profiles')
       .select('id, full_name, role')
       .eq('id', userId)
       .single();
     if (profile) {
-      req.user = { id: userId, email: payload.email ?? null, ...profile };
+      req.user = { id: userId, email: authData.user.email ?? null, ...profile };
     }
   } catch {
     /* ignore */

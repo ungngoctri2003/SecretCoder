@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
-  Alert,
   Box,
   Button,
   Card,
@@ -24,6 +23,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { toast } from 'sonner';
 import { PageHeader } from '../components/PageHeader';
 import { useAuth } from '../context/useAuth';
 import { apiFetch } from '../lib/api';
@@ -47,8 +47,6 @@ export function DashboardAdmin() {
   const { session } = useAuth();
   const token = session?.access_token;
   const [tab, setTab] = useState('users');
-  const [err, setErr] = useState('');
-  const [msg, setMsg] = useState('');
 
   const [users, setUsers] = useState([]);
   const [contacts, setContacts] = useState([]);
@@ -103,7 +101,7 @@ export function DashboardAdmin() {
         if (!token) return;
         await loadAll();
       } catch (e) {
-        if (!cancelled) setErr(e.message || ERR.LOAD_FAILED);
+        if (!cancelled) toast.error(e.message || ERR.LOAD_FAILED);
       }
     })();
     return () => {
@@ -112,19 +110,17 @@ export function DashboardAdmin() {
   }, [token, loadAll]);
 
   async function updateRole(userId, role) {
-    setErr('');
     try {
       await apiFetch(`/api/admin/users/${userId}/role`, { method: 'PATCH', body: JSON.stringify({ role }) }, token);
-      setMsg(DASH_ADMIN.ROLE_UPDATED);
+      toast.success(DASH_ADMIN.ROLE_UPDATED);
       await loadAll();
     } catch (e) {
-      setErr(e.data?.error || e.message);
+      toast.error(e.data?.error || e.message);
     }
   }
 
   async function addCategory(e) {
     e.preventDefault();
-    setErr('');
     try {
       await apiFetch(
         '/api/admin/categories',
@@ -134,26 +130,26 @@ export function DashboardAdmin() {
       setCatName('');
       setCatSlug('');
       setCatImg('');
+      toast.success(DASH_ADMIN.TOAST_CAT_ADDED);
       await loadAll();
     } catch (e) {
-      setErr(e.data?.error || e.message);
+      toast.error(e.data?.error || e.message);
     }
   }
 
   async function deleteCategory(id) {
     if (!confirm(DASH_ADMIN.CONFIRM_DEL_CAT)) return;
-    setErr('');
     try {
       await apiFetch(`/api/admin/categories/${id}`, { method: 'DELETE' }, token);
+      toast.success(DASH_ADMIN.TOAST_DELETED);
       await loadAll();
     } catch (e) {
-      setErr(e.data?.error || e.message);
+      toast.error(e.data?.error || e.message);
     }
   }
 
   async function addCourse(e) {
     e.preventDefault();
-    setErr('');
     try {
       await apiFetch(
         '/api/admin/courses',
@@ -175,45 +171,49 @@ export function DashboardAdmin() {
         },
         token,
       );
-      setMsg(DASH_ADMIN.COURSE_CREATED);
+      toast.success(DASH_ADMIN.COURSE_CREATED);
       await loadAll();
     } catch (e) {
-      setErr(e.data?.error || e.message);
+      toast.error(e.data?.error || e.message);
     }
   }
 
   async function deleteCourse(id) {
     if (!confirm(DASH_ADMIN.CONFIRM_DEL_COURSE)) return;
-    setErr('');
     try {
       await apiFetch(`/api/admin/courses/${id}`, { method: 'DELETE' }, token);
+      toast.success(DASH_ADMIN.TOAST_DELETED);
       await loadAll();
     } catch (e) {
-      setErr(e.data?.error || e.message);
+      toast.error(e.data?.error || e.message);
     }
   }
 
   async function addTeam(e) {
     e.preventDefault();
-    setErr('');
     try {
       await apiFetch('/api/admin/team', { method: 'POST', body: JSON.stringify(teamForm) }, token);
       setTeamForm({ name: '', role_title: '', image_url: '', bio: '' });
+      toast.success(DASH_ADMIN.TOAST_TEAM_ADDED);
       await loadAll();
     } catch (e) {
-      setErr(e.data?.error || e.message);
+      toast.error(e.data?.error || e.message);
     }
   }
 
   async function deleteTeam(id) {
     if (!confirm(DASH_ADMIN.CONFIRM_DEL)) return;
-    await apiFetch(`/api/admin/team/${id}`, { method: 'DELETE' }, token);
-    await loadAll();
+    try {
+      await apiFetch(`/api/admin/team/${id}`, { method: 'DELETE' }, token);
+      toast.success(DASH_ADMIN.TOAST_DELETED);
+      await loadAll();
+    } catch (e) {
+      toast.error(e.data?.error || e.message);
+    }
   }
 
   async function addTestimonial(e) {
     e.preventDefault();
-    setErr('');
     try {
       await apiFetch(
         '/api/admin/testimonials',
@@ -221,16 +221,22 @@ export function DashboardAdmin() {
         token,
       );
       setTestForm({ author_name: '', author_title: '', content: '', rating: 5 });
+      toast.success(DASH_ADMIN.TOAST_TEST_ADDED);
       await loadAll();
     } catch (e) {
-      setErr(e.data?.error || e.message);
+      toast.error(e.data?.error || e.message);
     }
   }
 
   async function deleteTestimonial(id) {
     if (!confirm(DASH_ADMIN.CONFIRM_DEL)) return;
-    await apiFetch(`/api/admin/testimonials/${id}`, { method: 'DELETE' }, token);
-    await loadAll();
+    try {
+      await apiFetch(`/api/admin/testimonials/${id}`, { method: 'DELETE' }, token);
+      toast.success(DASH_ADMIN.TOAST_DELETED);
+      await loadAll();
+    } catch (e) {
+      toast.error(e.data?.error || e.message);
+    }
   }
 
   const rowSx = { '&:nth-of-type(odd)': { bgcolor: 'action.hover' } };
@@ -239,17 +245,6 @@ export function DashboardAdmin() {
     <>
       <PageHeader title={DASH_ADMIN.TITLE} crumbs={[{ label: DASH_ADMIN.CRUMB, active: true }]} />
       <div className="container mx-auto max-w-6xl px-4 py-12">
-        {err ? (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {err}
-          </Alert>
-        ) : null}
-        {msg ? (
-          <Alert severity="success" sx={{ mb: 2 }} onClose={() => setMsg('')}>
-            {msg}
-          </Alert>
-        ) : null}
-
         <Tabs
           value={tab}
           onChange={(_, v) => setTab(v)}
