@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { Link, useNavigate, Navigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import {
   Alert,
   Box,
@@ -27,13 +27,15 @@ import { ROLE } from '../strings/vi';
 export function Signup() {
   const { signUp, session, loading, profile, profileLoading, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from || '/dashboard';
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   if (!loading && session && profile && !profileLoading) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={from} replace />;
   }
 
   if (!loading && session && profileLoading) {
@@ -66,7 +68,7 @@ export function Signup() {
       const data = await signUp(email, password, fullName);
       if (data?.session) {
         toast.success(AUTH.SIGNUP_SUCCESS);
-        navigate('/dashboard', { replace: true });
+        navigate(from, { replace: true });
       } else {
         toast.success(AUTH.CHECK_EMAIL);
       }
@@ -196,7 +198,7 @@ export function Signup() {
 
             <Typography variant="body2" color="text.secondary" textAlign="center">
               {AUTH.HAS_ACCOUNT}{' '}
-              <MuiLink component={Link} to="/login" fontWeight={700} underline="hover">
+              <MuiLink component={Link} to="/login" state={{ from }} fontWeight={700} underline="hover">
                 {AUTH.LOGIN_TITLE}
               </MuiLink>
             </Typography>

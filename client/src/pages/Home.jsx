@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Box, Button, IconButton, Typography } from '@mui/material';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { TeamMemberGrid } from '../components/TeamMemberGrid';
+import { VI_TEAM_TEACHERS } from '../data/viTeamTeachers';
 import { apiFetch } from '../lib/api';
 import { HOME, TEAM_PAGE } from '../strings/vi';
 
@@ -52,9 +53,10 @@ export function Home() {
       try {
         const data = await apiFetch('/api/team');
         const list = Array.isArray(data) ? data : [];
-        if (!cancelled) setTeamPreview(list.slice(0, 4));
+        const merged = [...list, ...VI_TEAM_TEACHERS];
+        if (!cancelled) setTeamPreview(merged.slice(0, 4));
       } catch {
-        if (!cancelled) setTeamPreview([]);
+        if (!cancelled) setTeamPreview(VI_TEAM_TEACHERS.slice(0, 4));
       }
     })();
     return () => {

@@ -154,16 +154,31 @@ r.get('/courses', async (req, res) => {
   res.json(data);
 });
 
+function slugFromTitle(title) {
+  const raw = String(title || '')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+  let s = raw.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  if (!s) s = `khoa-hoc-${Date.now()}`;
+  return s.slice(0, 120);
+}
+
 r.post('/courses', async (req, res) => {
   const body = req.body || {};
-  if (!body.title || !body.slug) {
-    return res.status(400).json({ error: 'title and slug required' });
+  if (!body.title || typeof body.title !== 'string' || !String(body.title).trim()) {
+    return res.status(400).json({ error: 'title required' });
   }
+  const slug =
+    typeof body.slug === 'string' && String(body.slug).trim()
+      ? String(body.slug).trim().toLowerCase().replace(/\s+/g, '-').slice(0, 120)
+      : slugFromTitle(body.title);
   const { data, error } = await supabaseAdmin
     .from('courses')
     .insert({
-      title: body.title,
-      slug: body.slug,
+      title: String(body.title).trim(),
+      slug,
       description: body.description ?? null,
       thumbnail_url: body.thumbnail_url ?? null,
       category_id: body.category_id ?? null,
@@ -191,6 +206,9 @@ r.patch('/courses/:id', async (req, res) => {
   for (const k of allowed) {
     if (req.body[k] !== undefined) patch[k] = req.body[k];
   }
+  if (patch.title !== undefined && req.body.slug === undefined) {
+    patch.slug = slugFromTitle(patch.title);
+  }
   const { data, error } = await supabaseAdmin
     .from('courses')
     .update(patch)
@@ -205,6 +223,52 @@ r.delete('/courses/:id', async (req, res) => {
   const { error } = await supabaseAdmin.from('courses').delete().eq('id', req.params.id);
   if (error) return res.status(500).json({ error: error.message });
   res.status(204).send();
+});
+
+r.get('/enrollments', async (_req, res) => {
+  const { data: rows, error } = await supabaseAdmin
+    .from('enrollments')
+    .select('id, enrolled_at, student_id, course_id, courses(id, title, slug), profiles(id, full_name, email)')
+    .order('enrolled_at', { ascending: false });
+  if (error) return res.status(500).json({ error: error.message });
+  const list = rows || [];
+
+  const byCourseMap = new Map();
+  for (const row of list) {
+    const c = row.courses;
+    const cid = c?.id || row.course_id;
+    if (!cid) continue;
+    const cur = byCourseMap.get(cid) || {
+      course_id: cid,
+      title: c?.title || '—',
+      slug: c?.slug || '',
+      count: 0,
+    };
+    cur.count += 1;
+    byCourseMap.set(cid, cur);
+  }
+  const byCourse = [...byCourseMap.values()].sort((a, b) => b.count - a.count);
+
+  const byDayMap = new Map();
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  for (let i = 29; i >= 0; i -= 1) {
+    const d = new Date(today);
+    d.setUTCDate(d.getUTCDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    byDayMap.set(key, 0);
+  }
+  for (const row of list) {
+    if (!row.enrolled_at) continue;
+    const key = new Date(row.enrolled_at).toISOString().slice(0, 10);
+    if (byDayMap.has(key)) byDayMap.set(key, (byDayMap.get(key) || 0) + 1);
+  }
+  const byDay = [...byDayMap.entries()].map(([day, count]) => ({ day, count }));
+
+  res.json({
+    enrollments: list,
+    stats: { byCourse, byDay },
+  });
 });
 
 // Course lectures

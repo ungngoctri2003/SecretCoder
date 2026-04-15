@@ -63,6 +63,7 @@ export const ERR = {
   SIGNUP_FAILED: '\u0110\u0103ng k\xFD th\u1EA5t b\u1EA1i',
   SEND_FAILED: 'G\u1EEDi th\u1EA5t b\u1EA1i',
   ENROLL_FAILED: '\u0110\u0103ng k\xFD kh\xF3a h\u1ECDc th\u1EA5t b\u1EA1i',
+  LOAD_ENROLL_REPORT: 'Kh\xF4ng t\u1EA3i b\xE1o c\xE1o \u0111\u0103ng k\xFD',
   INVALID_JSON: 'JSON kh\xF4ng h\u1EE3p l\u1EC7',
 };
 
@@ -151,6 +152,8 @@ export const COURSES_PAGE = {
   TOPICS: 'Ch\u1EE7 \u0111\u1EC1 ph\u1ED5 bi\u1EBFn',
   ALL_COURSES: 'T\u1EA5t c\u1EA3 kh\xF3a h\u1ECDc',
   EMPTY: 'Ch\u01B0a c\xF3 kh\xF3a h\u1ECDc \u0111\u01B0\u1EE3c xu\u1EA5t b\u1EA3n. H\xE3y seed c\u01A1 s\u1EDF d\u1EEF li\u1EC7u ho\u1EB7c th\xEAm t\u1EEB qu\u1EA3n tr\u1ECB.',
+  VIEW_COURSE_ARIA: 'Xem chi ti\u1EBFt kh\xF3a h\u1ECDc',
+  OPEN_COURSE: 'Xem kh\xF3a h\u1ECDc',
 };
 
 export const COURSE_DETAIL = {
@@ -168,6 +171,8 @@ export const COURSE_DETAIL = {
   LOGIN_LINK: '\u0110\u0103ng nh\u1EADp',
   LOGIN_SUFFIX: ' v\u1EDBi t\u01B0 c\xE1ch h\u1ECDc vi\xEAn \u0111\u1EC3 \u0111\u0103ng k\xFD.',
   SECTION_LECTURES: 'B\xE0i gi\u1EA3ng',
+  LECTURES_SUBTITLE: 'Danh s\xE1ch b\xE0i theo th\u1EE9 t\u1EF1 h\u1ECDc. M\u1EDF t\u1EEBng b\xE0i \u0111\u1EC3 xem n\u1ED9i dung v\xE0 video.',
+  LECTURE_PARTS: '{n} ph\u1EA7n n\u1ED9i dung',
   SECTION_QUIZZES: 'B\xE0i ki\u1EC3m tra',
   NO_LECTURES: 'Ch\u01B0a c\xF3 b\xE0i gi\u1EA3ng n\xE0o.',
   NO_QUIZZES: 'Ch\u01B0a c\xF3 b\xE0i ki\u1EC3m tra n\xE0o.',
@@ -176,6 +181,17 @@ export const COURSE_DETAIL = {
   QUIZ_SCORE: '\u0110\xFAng {correct}/{total} c\xE2u ({percent}%).',
   QUIZ_SUBMIT_ERR: 'Kh\xF4ng n\u1ED9p b\xE0i \u0111\u01B0\u1EE3c. Vui l\xF2ng th\u1EED l\u1EA1i.',
   OPEN_VIDEO: 'M\u1EDF video',
+  LOCKED_HINT:
+    'N\u1ED9i dung b\xE0i gi\u1EA3ng ch\u1EC9 d\xE0nh cho h\u1ECDc vi\xEAn \u0111\xE3 \u0111\u0103ng k\xFD. H\xE3y \u0111\u0103ng k\xFD kh\xF3a h\u1ECDc \u0111\u1EC3 xem v\xE0 h\u1ECDc.',
+  LOCKED_QUIZZES: 'B\xE0i ki\u1EC3m tra ch\u1EC9 kh\u1EA3 d\u1EE5ng sau khi b\u1EA1n \u0111\xE3 \u0111\u0103ng k\xFD kh\xF3a h\u1ECDc.',
+  DIALOG_AUTH_TITLE: 'C\u1EA7n \u0111\u0103ng nh\u1EADp ho\u1EB7c \u0111\u0103ng k\xFD',
+  DIALOG_AUTH_BODY:
+    'Vui l\xF2ng \u0111\u0103ng nh\u1EADp ho\u1EB7c t\u1EA1o t\xE0i kho\u1EA3n h\u1ECDc vi\xEAn \u0111\u1EC3 \u0111\u0103ng k\xFD v\xE0 h\u1ECDc kh\xF3a h\u1ECDc n\xE0y.',
+  DIALOG_LOGIN: '\u0110\u0103ng nh\u1EADp',
+  DIALOG_SIGNUP: '\u0110\u0103ng k\xFD t\xE0i kho\u1EA3n',
+  DIALOG_ROLE_TITLE: 'Kh\xF4ng th\u1EC3 \u0111\u0103ng k\xFD',
+  GO_DASHBOARD: 'B\u1EA3ng h\u1ECDc vi\xEAn',
+  GO_STUDY: 'V\xE0o h\u1ECDc',
 };
 
 export const CONTACT_PAGE = {
@@ -250,19 +266,46 @@ export const DASH_STUDENT = {
   TH_COURSE: 'Kh\xF3a h\u1ECDc',
   TH_ENROLLED: 'Ng\xE0y \u0111\u0103ng k\xFD',
   EMPTY: 'B\u1EA1n ch\u01B0a \u0111\u0103ng k\xFD kh\xF3a h\u1ECDc n\xE0o.',
+  GO_STUDY: 'V\xE0o h\u1ECDc',
+  REVIEWS_KICKER: 'C\u1ED9ng \u0111\u1ED3ng',
+  REVIEWS_H2: 'Nh\u1EADn x\xEAt t\u1EEB h\u1ECDc vi\xEAn',
+  REVIEWS_NOTE:
+    'M\u1ED9t s\u1ED1 nh\u1EADn x\xE9t minh h\u1ECDa giao di\u1EC7n \u0111\u01B0\u1EE3c th\xEAm tr\xEAn tr\xECnh duy\u1EC7t.',
 };
 
 export const DASH_ADMIN = {
   TITLE: 'B\u1EA3ng qu\u1EA3n tr\u1ECB',
   CRUMB: 'Qu\u1EA3n tr\u1ECB',
+  LEAD_USERS: 'Th\xEAm, s\u1EEDa v\xE0 g\xE1n vai tr\xF2 t\xE0i kho\u1EA3n tr\xEAn n\u1EC1n t\u1EA3ng.',
+  LEAD_COURSES: 'T\u1EA1o kh\xF3a h\u1ECDc, qu\u1EA3n l\xFD danh s\xE1ch v\xE0 bi\xEAn so\u1EA1n b\xE0i gi\u1EA3ng, b\xE0i ki\u1EC3m tra.',
+  LEAD_ENROLLMENTS: 'Theo d\xF5i h\u1ECDc vi\xEAn \u0111\xE3 \u0111\u0103ng k\xFD theo kh\xF3a v\xE0 theo th\u1EDDi gian.',
+  SECTION_ADD_COURSE: 'T\u1EA1o kh\xF3a h\u1ECDc m\u1EDBi',
+  SECTION_COURSE_LIST: 'Danh s\xE1ch kh\xF3a h\u1ECDc',
+  STATUS_PUBLISHED: '\u0110\xE3 xu\u1EA5t b\u1EA3n',
+  STATUS_DRAFT: 'Nh\xE1p',
+  DELETE_TOOLTIP: 'X\xF3a',
   COURSE_CREATED: '\u0110\xE3 t\u1EA1o kh\xF3a h\u1ECDc',
+  COURSE_UPDATED: '\u0110\xE3 c\u1EADp nh\u1EADt kh\xF3a h\u1ECDc',
+  COURSE_DIALOG_EDIT: 'S\u1EEDa kh\xF3a h\u1ECDc',
+  EDIT_TOOLTIP: 'S\u1EEDa',
+  TITLE_REQUIRED: 'Vui l\xF2ng nh\u1EADp ti\xEAu \u0111\u1EC1 kh\xF3a h\u1ECDc.',
   CONFIRM_DEL_CAT: 'X\xF3a danh m\u1EE5c n\xE0y?',
   CONFIRM_DEL_COURSE: 'X\xF3a kh\xF3a h\u1ECDc n\xE0y?',
   CONFIRM_DEL: 'X\xF3a m\u1EE5c n\xE0y?',
   TABS: {
     users: 'Ng\u01B0\u1EDDi d\xF9ng',
     courses: 'Kh\xF3a h\u1ECDc',
+    enrollments: '\u0110\u0103ng k\xFD kh\xF3a h\u1ECDc',
   },
+  ENROLL_STATS_TITLE: 'H\u1ECDc vi\xEAn theo kh\xF3a h\u1ECDc',
+  ENROLL_TIMELINE_TITLE: '\u0110\u0103ng k\xFD 30 ng\xE0y g\u1EA7n \u0111\xE2y',
+  ENROLL_FILTER_ALL: 'T\u1EA5t c\u1EA3 kh\xF3a h\u1ECDc',
+  TH_ENROLL_COURSE: 'Kh\xF3a h\u1ECDc',
+  TH_ENROLL_STUDENT: 'H\u1ECDc vi\xEAn',
+  TH_ENROLL_EMAIL: 'Email',
+  TH_ENROLL_DATE: 'Ng\xE0y \u0111\u0103ng k\xFD',
+  CHART_STUDENTS: 'S\u1ED1 h\u1ECDc vi\xEAn',
+  ENROLL_TABLE_EMPTY: 'Ch\u01B0a c\xF3 \u0111\u0103ng k\xFD n\xE0o.',
   COURSE_CONTENT: 'N\u1ED9i dung kh\xF3a h\u1ECDc',
   PICK_COURSE: 'Ch\u1ECDn kh\xF3a h\u1ECDc',
   SUBTAB_LECTURES: 'B\xE0i gi\u1EA3ng',
@@ -278,6 +321,8 @@ export const DASH_ADMIN = {
   ADD_LECTURE_BLOCK: 'Th\xEAm kh\u1ED1i',
   REMOVE_LECTURE_BLOCK: 'X\xF3a kh\u1ED1i',
   LECTURE_BLOCKS_EMPTY: 'Th\xEAm \xEDt nh\u1EA5t m\u1ED9t kh\u1ED1i c\xF3 ti\xEAu \u0111\u1EC1, n\u1ED9i dung ho\u1EB7c video.',
+  LECTURE_TITLE_REQUIRED: 'Vui l\xF2ng nh\u1EADp ti\xEAu \u0111\u1EC1 b\xE0i gi\u1EA3ng.',
+  LECTURE_DIALOG_EDIT: 'S\u1EEDa b\xE0i gi\u1EA3ng',
   TH_LECTURE_BLOCKS: 'S\u1ED1 kh\u1ED1i',
   QUIZ_TITLE: 'Ti\xEAu \u0111\u1EC1 b\xE0i ki\u1EC3m tra',
   QUIZ_DESC: 'M\xF4 t\u1EA3',
@@ -294,6 +339,7 @@ export const DASH_ADMIN = {
   QUIZ_NEED_QUESTION: 'Th\xEAm \xEDt nh\u1EA5t m\u1ED9t c\xE2u h\u1ECFi h\u1EE3p l\u1EC7.',
   ADD_QUIZ: 'Th\xEAm b\xE0i ki\u1EC3m tra',
   TOAST_LECTURE_ADDED: '\u0110\xE3 th\xEAm b\xE0i gi\u1EA3ng',
+  TOAST_LECTURE_UPDATED: '\u0110\xE3 c\u1EADp nh\u1EADt b\xE0i gi\u1EA3ng',
   TOAST_QUIZ_ADDED: '\u0110\xE3 th\xEAm b\xE0i ki\u1EC3m tra',
   CONFIRM_DEL_LECTURE: 'X\xF3a b\xE0i gi\u1EA3ng n\xE0y?',
   CONFIRM_DEL_QUIZ: 'X\xF3a b\xE0i ki\u1EC3m tra n\xE0y?',

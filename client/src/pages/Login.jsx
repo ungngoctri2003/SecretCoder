@@ -35,7 +35,7 @@ export function Login() {
   const [submitting, setSubmitting] = useState(false);
 
   if (!loading && session && profile && !profileLoading) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={from} replace />;
   }
 
   if (!loading && session && profileLoading) {
@@ -176,7 +176,7 @@ export function Login() {
 
             <Typography variant="body2" color="text.secondary" textAlign="center">
               {AUTH.NO_ACCOUNT}{' '}
-              <MuiLink component={Link} to="/signup" fontWeight={700} underline="hover">
+              <MuiLink component={Link} to="/signup" state={{ from }} fontWeight={700} underline="hover">
                 {AUTH.SIGNUP_TITLE}
               </MuiLink>
             </Typography>

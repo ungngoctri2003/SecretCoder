@@ -5,6 +5,7 @@ import cors from 'cors';
 import publicRoutes from './routes/public.js';
 import contactRoutes from './routes/contact.js';
 import enrollRoutes from './routes/enrollments.js';
+import learnRoutes from './routes/learn.js';
 import adminRoutes from './routes/admin.js';
 import meRoutes from './routes/me.js';
 
@@ -35,6 +36,7 @@ app.use('/api', publicRoutes);
 app.use('/api/me', meRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/enrollments', enrollRoutes);
+app.use('/api/learn', learnRoutes);
 app.use('/api/admin', adminRoutes);
 
 app.use((err, _req, res, _next) => {
