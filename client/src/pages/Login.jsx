@@ -88,10 +88,7 @@ export function Login() {
         sx={{
           width: '100%',
           maxWidth: 440,
-          borderRadius: 3,
-          border: 1,
-          borderColor: 'divider',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
+          boxShadow: (t) => t.shadows[3],
         }}
       >
         <CardContent sx={{ p: { xs: 3, sm: 4 } }}>

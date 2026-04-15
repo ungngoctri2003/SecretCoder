@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import { Fab } from '@mui/material';
+import { Box, Fab } from '@mui/material';
 import { ChevronUp } from 'lucide-react';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
@@ -18,9 +18,9 @@ export function Layout() {
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
-      <main className="flex-1">
+      <Box component="main" sx={{ flex: 1, bgcolor: 'background.default', minWidth: 0 }}>
         <Outlet />
-      </main>
+      </Box>
       <Footer />
       {showTop && (
         <Fab

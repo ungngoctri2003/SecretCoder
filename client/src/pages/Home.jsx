@@ -222,10 +222,13 @@ export function Home() {
                   className="h-full text-left"
                   sx={{
                     p: 3,
-                    borderRadius: 2,
-                    border: '1px solid',
-                    borderColor: 'divider',
-                    boxShadow: '0 4px 24px rgba(28, 36, 51, 0.06)',
+                    height: '100%',
+                    transition: 'box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: (t) => t.shadows[3],
+                      borderColor: 'primary.main',
+                    },
                   }}
                 >
                   <Box
@@ -300,7 +303,14 @@ export function Home() {
         ) : null}
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {categoriesPreview.map((cat) => (
-            <Card key={cat.id} variant="outlined" sx={{ borderRadius: 2, transition: 'box-shadow 0.2s', '&:hover': { boxShadow: 3 } }}>
+            <Card
+              key={cat.id}
+              elevation={0}
+              sx={{
+                transition: 'box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease',
+                '&:hover': { boxShadow: (t) => t.shadows[3], transform: 'translateY(-2px)', borderColor: 'primary.main' },
+              }}
+            >
               <CardActionArea component={Link} to="/courses" sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2, p: 2 }}>
                 {cat.image_url ? (
                   <Box
@@ -363,7 +373,7 @@ export function Home() {
       </section>
 
       {teamPreview.length > 0 ? (
-        <section className="container mx-auto max-w-6xl px-4 py-14">
+        <section className="container mx-auto max-w-6xl px-4 py-16">
           <div className="text-center">
             <p className="text-sm font-semibold uppercase tracking-wide text-primary">{TEAM_PAGE.KICKER}</p>
             <h2 className="font-display mt-2 text-3xl font-bold text-base-content md:text-4xl">{TEAM_PAGE.H2}</h2>

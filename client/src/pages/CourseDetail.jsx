@@ -239,8 +239,29 @@ export function CourseDetail() {
           title={COURSE_DETAIL.TITLE_FALLBACK}
           crumbs={[{ label: COURSE_DETAIL.CRUMB, to: '/courses' }, { label: slug || '', active: true }]}
         />
-        <Box className="container mx-auto max-w-2xl px-4 py-12">
-          <Alert severity="warning">{err || COMMON.LOADING}</Alert>
+        <Box className="container mx-auto max-w-2xl px-4 py-16">
+          {!course && !err ? (
+            <Paper
+              elevation={0}
+              sx={{
+                p: 5,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 2,
+                borderStyle: 'dashed',
+              }}
+            >
+              <CircularProgress size={32} />
+              <Typography color="text.secondary" fontWeight={500}>
+                {COMMON.LOADING}
+              </Typography>
+            </Paper>
+          ) : (
+            <Alert severity="warning" sx={{ borderRadius: 2 }}>
+              {err || COMMON.LOADING}
+            </Alert>
+          )}
           <Button component={Link} to="/courses" variant="text" color="primary" sx={{ mt: 2, px: 0 }}>
             {COURSE_DETAIL.BACK}
           </Button>
@@ -259,9 +280,12 @@ export function CourseDetail() {
   return (
     <>
       <PageHeader title={course.title} crumbs={[{ label: COURSE_DETAIL.CRUMB, to: '/courses' }, { label: course.title, active: true }]} />
-      <div className="container mx-auto max-w-6xl px-4 py-12">
+      <div className="container mx-auto max-w-6xl px-4 py-16">
         <div className="grid gap-10 md:grid-cols-2">
-          <Box className="overflow-hidden rounded-2xl shadow-lg" sx={{ border: 1, borderColor: 'divider' }}>
+          <Box
+            className="overflow-hidden rounded-2xl"
+            sx={{ border: 1, borderColor: 'divider', boxShadow: (t) => t.shadows[3] }}
+          >
             <Box component="img" src={course.thumbnail_url || '/img/course-1.png'} alt="" sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </Box>
           <div>
@@ -311,12 +335,12 @@ export function CourseDetail() {
         >
           <Paper
             elevation={0}
-            sx={(theme) => ({
+            sx={{
               borderRadius: 3,
-              border: `1px solid ${theme.palette.divider}`,
               overflow: 'hidden',
               bgcolor: 'background.paper',
-            })}
+              boxShadow: (t) => t.shadows[2],
+            }}
           >
             <Tabs
               value={learnTab}
@@ -411,9 +435,22 @@ export function CourseDetail() {
               </Paper>
 
               {showContentSpinner ? (
-                <Paper variant="outlined" sx={{ p: 3, borderRadius: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 3,
+                    borderRadius: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2,
+                    borderStyle: 'dashed',
+                    bgcolor: 'action.hover',
+                  }}
+                >
                   <CircularProgress size={28} />
-                  <Typography color="text.secondary">{COMMON.LOADING}</Typography>
+                  <Typography color="text.secondary" fontWeight={500}>
+                    {COMMON.LOADING}
+                  </Typography>
                 </Paper>
               ) : null}
               {locked && !showContentSpinner ? (
@@ -423,7 +460,7 @@ export function CourseDetail() {
               ) : null}
               {showContent && lectures.length === 0 ? (
                 <Paper
-                  variant="outlined"
+                  elevation={0}
                   sx={{
                     py: 5,
                     px: 2,
@@ -569,9 +606,22 @@ export function CourseDetail() {
               </Paper>
 
               {showContentSpinner ? (
-                <Paper variant="outlined" sx={{ p: 3, borderRadius: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 3,
+                    borderRadius: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2,
+                    borderStyle: 'dashed',
+                    bgcolor: 'action.hover',
+                  }}
+                >
                   <CircularProgress size={28} />
-                  <Typography color="text.secondary">{COMMON.LOADING}</Typography>
+                  <Typography color="text.secondary" fontWeight={500}>
+                    {COMMON.LOADING}
+                  </Typography>
                 </Paper>
               ) : null}
               {locked && !showContentSpinner ? (
@@ -581,7 +631,7 @@ export function CourseDetail() {
               ) : null}
               {showContent && quizzes.length === 0 ? (
                 <Paper
-                  variant="outlined"
+                  elevation={0}
                   sx={{
                     py: 5,
                     px: 2,

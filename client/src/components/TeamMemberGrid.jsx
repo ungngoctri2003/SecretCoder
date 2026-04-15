@@ -8,7 +8,15 @@ export function TeamMemberGrid({ members }) {
   return (
     <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
       {members.map((m) => (
-        <Card key={m.id} variant="outlined" sx={{ textAlign: 'center', boxShadow: 2 }}>
+        <Card
+          key={m.id}
+          elevation={0}
+          sx={{
+            textAlign: 'center',
+            transition: 'box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease',
+            '&:hover': { boxShadow: (t) => t.shadows[3], transform: 'translateY(-3px)', borderColor: 'primary.main' },
+          }}
+        >
           <Box sx={{ px: 3, pt: 3 }}>
             {m.image_url ? (
               <Box

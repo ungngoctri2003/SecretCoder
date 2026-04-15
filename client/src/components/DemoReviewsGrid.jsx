@@ -7,7 +7,15 @@ export function DemoReviewsGrid({ items }) {
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
       {items.map((t) => (
-        <Card key={t.id} variant="outlined" sx={{ boxShadow: 2 }}>
+        <Card
+          key={t.id}
+          elevation={0}
+          sx={{
+            height: '100%',
+            transition: 'box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease',
+            '&:hover': { boxShadow: (theme) => theme.shadows[3], transform: 'translateY(-2px)', borderColor: 'primary.main' },
+          }}
+        >
           <CardContent>
             <Typography sx={{ color: 'text.primary', opacity: 0.9 }}>&ldquo;{t.content}&rdquo;</Typography>
             <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 1.5 }}>

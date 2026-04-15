@@ -14,15 +14,11 @@ export function CourseCatalogCard({ course }) {
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
-        borderRadius: 3,
-        border: '1px solid',
-        borderColor: 'divider',
         bgcolor: 'background.paper',
-        boxShadow: '0 4px 24px rgba(28, 36, 51, 0.06)',
         transition: 'transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease',
         '&:hover': {
-          transform: 'translateY(-8px)',
-          boxShadow: '0 24px 48px -12px rgba(28, 36, 51, 0.14)',
+          transform: 'translateY(-6px)',
+          boxShadow: (t) => t.shadows[5],
           borderColor: 'primary.main',
         },
         '& .MuiCardActionArea-root:hover .courses-card-media': {

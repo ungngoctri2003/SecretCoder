@@ -7,7 +7,7 @@ export function Instructor() {
   return (
     <>
       <PageHeader title={INSTRUCTOR_PAGE.TITLE} crumbs={[{ label: INSTRUCTOR_PAGE.CRUMB, active: true }]} />
-      <div className="container mx-auto max-w-6xl px-4 py-12">
+      <div className="container mx-auto max-w-6xl px-4 py-16">
         <div className="text-center">
           <h2 className="font-display text-3xl font-bold text-primary md:text-4xl">{INSTRUCTOR_PAGE.H2}</h2>
         </div>
@@ -20,7 +20,7 @@ export function Instructor() {
           </Button>
         </div>
       </div>
-      <div className="container mx-auto max-w-6xl px-4 pb-16">
+      <div className="container mx-auto max-w-6xl px-4 pb-24 pt-4">
         <div className="grid items-center gap-10 md:grid-cols-2">
           <div className="relative aspect-[4/3] overflow-hidden rounded-2xl shadow-lg" style={{ border: '1px solid var(--color-base-300)' }}>
             <img src="/img/about.jpg" alt="" className="h-full w-full object-cover" />

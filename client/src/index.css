@@ -2,23 +2,28 @@
 
 @import 'tailwindcss';
 
+/*
+ * Tailwind @theme = marketing / utility classes (bg-base-200, text-primary, …).
+ * Forms, dashboards, and MUI components use client/src/theme.js (same hex intent).
+ * Prefer MUI sx/palette for app surfaces; use Tailwind where class-only markup exists.
+ */
 @theme {
   --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
   --font-display: 'Outfit', ui-sans-serif, system-ui, sans-serif;
 
-  /* Palette (trước đây từ DaisyUI theme EduStart / edustart) */
-  --color-base-100: oklch(99% 0.002 240);
-  --color-base-200: oklch(96% 0.008 240);
-  --color-base-300: oklch(90% 0.012 240);
-  --color-base-content: oklch(25% 0.04 260);
-  --color-primary: oklch(72% 0.17 55);
-  --color-primary-content: oklch(100% 0 0);
-  --color-secondary: oklch(35% 0.08 260);
-  --color-secondary-content: oklch(98% 0.01 260);
-  --color-accent: oklch(72% 0.17 55);
-  --color-accent-content: oklch(100% 0 0);
-  --color-neutral: oklch(45% 0.02 260);
-  --color-neutral-content: oklch(98% 0.01 260);
+  /* Aligned with appTheme: canvas #eef1f5, paper #fff, primary #e8872a, ink #1c2433 */
+  --color-base-100: #ffffff;
+  --color-base-200: #eef1f5;
+  --color-base-300: #dce3ea;
+  --color-base-content: #1c2433;
+  --color-primary: #e8872a;
+  --color-primary-content: #ffffff;
+  --color-secondary: #354056;
+  --color-secondary-content: #f4f6f9;
+  --color-accent: #e8872a;
+  --color-accent-content: #ffffff;
+  --color-neutral: #5c6578;
+  --color-neutral-content: #f4f6f9;
 }
 
 @utility font-display {

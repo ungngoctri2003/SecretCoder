@@ -5,9 +5,9 @@ export function About() {
   return (
     <>
       <PageHeader title={ABOUT.TITLE} crumbs={[{ label: ABOUT.CRUMB, active: true }]} />
-      <div className="container mx-auto max-w-3xl px-4 py-12">
+      <div className="container mx-auto max-w-3xl px-4 py-16">
         <p className="text-sm font-semibold uppercase tracking-wide text-primary">{ABOUT.KICKER}</p>
-        <h2 className="font-display mt-2 text-3xl font-bold text-base-content">{ABOUT.H2}</h2>
+        <h2 className="font-display mt-2 text-3xl font-bold tracking-tight text-base-content md:text-4xl">{ABOUT.H2}</h2>
         <div className="mt-8 space-y-4 text-base-content/85">
           <p>{ABOUT.P1}</p>
           <p>{ABOUT.P2}</p>

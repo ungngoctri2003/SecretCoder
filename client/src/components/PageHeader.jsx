@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Box, Breadcrumbs, Link as MuiLink, Typography } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import { PAGE } from '../strings/vi';
 
 export function PageHeader({ title, crumbs = [] }) {
@@ -10,17 +11,21 @@ export function PageHeader({ title, crumbs = [] }) {
       sx={{
         bgcolor: 'primary.main',
         color: 'primary.contrastText',
+        borderBottom: 1,
+        borderColor: (t) => alpha(t.palette.common.black, 0.08),
+        boxShadow: (t) => `inset 0 -1px 0 ${alpha(t.palette.common.black, 0.06)}`,
       }}
     >
       <Box
         className="pointer-events-none absolute inset-0"
-        sx={{ opacity: 0.12 }}
-        style={{
-          backgroundImage:
-            'radial-gradient(circle at 20% 30%, oklch(100% 0 0), transparent 45%), radial-gradient(circle at 80% 70%, oklch(100% 0 0), transparent 40%)',
+        sx={{
+          opacity: 0.18,
+          backgroundImage: (t) =>
+            `radial-gradient(circle at 18% 28%, ${alpha(t.palette.common.white, 0.95)}, transparent 42%),
+             radial-gradient(circle at 82% 72%, ${alpha(t.palette.common.white, 0.55)}, transparent 38%)`,
         }}
       />
-      <Box className="container relative mx-auto max-w-6xl px-4 py-8 text-center md:py-10">
+      <Box className="container relative mx-auto max-w-6xl px-4 py-9 text-center md:py-11">
         <Typography
           component="h1"
           className="font-display"

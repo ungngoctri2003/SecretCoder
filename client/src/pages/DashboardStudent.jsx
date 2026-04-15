@@ -39,7 +39,7 @@ function formatQuizScoreShort(correct, total, percent) {
 function statCard(icon, label, value, loading) {
   return (
     <Paper
-      variant="outlined"
+      elevation={0}
       sx={{
         p: 2.5,
         borderRadius: 2,
@@ -48,7 +48,8 @@ function statCard(icon, label, value, loading) {
         alignItems: 'flex-start',
         gap: 2,
         bgcolor: (t) => alpha(t.palette.primary.main, 0.04),
-        borderColor: (t) => alpha(t.palette.primary.main, 0.12),
+        borderColor: (t) => alpha(t.palette.primary.main, 0.18),
+        boxShadow: (t) => t.shadows[1],
       }}
     >
       <Box
@@ -235,7 +236,7 @@ export function DashboardStudent() {
   return (
     <>
       <PageHeader title={DASH_STUDENT.TITLE} crumbs={[{ label: COMMON.DASH_CRUMB, active: true }]} />
-      <div className="container mx-auto max-w-6xl px-4 py-10">
+      <div className="container mx-auto max-w-6xl px-4 py-16">
         <Stack spacing={1} sx={{ mb: 4 }}>
           <Typography variant="h4" component="h1" sx={{ fontFamily: "'Outfit', ui-sans-serif, system-ui, sans-serif", fontWeight: 800, color: 'primary.main' }}>
             {greeting}
@@ -278,7 +279,15 @@ export function DashboardStudent() {
                 const title = r.courses?.title || '—';
                 const slug = r.courses?.slug;
                 return (
-                  <Card key={r.id} variant="outlined" sx={{ borderRadius: 2 }}>
+                  <Card
+                    key={r.id}
+                    elevation={0}
+                    sx={{
+                      borderRadius: 2,
+                      transition: 'box-shadow 0.2s ease, border-color 0.2s ease',
+                      '&:hover': { boxShadow: (t) => t.shadows[2], borderColor: 'primary.main' },
+                    }}
+                  >
                     <CardContent sx={{ pb: 1 }}>
                       <Typography variant="h6" sx={{ fontFamily: "'Outfit', ui-sans-serif, system-ui, sans-serif", fontWeight: 700 }}>
                         {title}
@@ -345,7 +354,7 @@ export function DashboardStudent() {
                 if (!lectures.length) return null;
                 const courseTitle = r.courses?.title || slug;
                 return (
-                  <Paper key={`lec-${r.id}`} variant="outlined" sx={{ p: 2.5, borderRadius: 2 }}>
+                  <Paper key={`lec-${r.id}`} elevation={0} sx={{ p: 2.5, borderRadius: 2, boxShadow: (t) => t.shadows[1] }}>
                     <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} justifyContent="space-between" alignItems={{ sm: 'center' }}>
                       <Typography variant="subtitle1" fontWeight={700}>
                         {courseTitle}
@@ -412,7 +421,7 @@ export function DashboardStudent() {
                 if (!quizzes.length) return null;
                 const courseTitle = r.courses?.title || slug;
                 return (
-                  <Paper key={`quiz-${r.id}`} variant="outlined" sx={{ p: 2.5, borderRadius: 2 }}>
+                  <Paper key={`quiz-${r.id}`} elevation={0} sx={{ p: 2.5, borderRadius: 2, boxShadow: (t) => t.shadows[1] }}>
                     <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} justifyContent="space-between" alignItems={{ sm: 'center' }}>
                       <Typography variant="subtitle1" fontWeight={700}>
                         {courseTitle}
@@ -508,7 +517,7 @@ export function DashboardStudent() {
             </Typography>
           ) : null}
           {!attemptsLoading && quizAttempts.length > 0 ? (
-            <Paper variant="outlined" sx={{ mt: 2, borderRadius: 2, overflow: 'auto' }}>
+            <Paper elevation={0} sx={{ mt: 2, borderRadius: 2, overflow: 'auto', boxShadow: (t) => t.shadows[1] }}>
               <Table size="small">
                 <TableHead>
                   <TableRow>

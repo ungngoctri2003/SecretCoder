@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { MapPin, Phone, Mail, Share2, MessageCircle, PlayCircle, Link2 } from 'lucide-react';
 import { Box, Button, Link as MuiLink, Stack, TextField, Typography } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import { FOOTER, NAV, SITE_CONTACT } from '../strings/vi';
 
 const footerLinkSx = {
@@ -19,6 +20,9 @@ export function Footer() {
       sx={{
         bgcolor: 'neutral.main',
         color: 'neutral.contrastText',
+        borderTop: 1,
+        borderColor: (t) => alpha(t.palette.common.white, 0.12),
+        boxShadow: (t) => `0 -8px 32px ${alpha(t.palette.common.black, 0.12)}`,
       }}
     >
       <Box

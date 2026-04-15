@@ -31,7 +31,7 @@ export function Testimonials() {
   return (
     <>
       <PageHeader title={TESTI_PAGE.TITLE} crumbs={[{ label: TESTI_PAGE.CRUMB, active: true }]} />
-      <div className="container mx-auto max-w-6xl px-4 py-12">
+      <div className="container mx-auto max-w-6xl px-4 py-16">
         <div className="text-center">
           <p className="text-sm font-semibold uppercase tracking-wide text-primary">{TESTI_PAGE.KICKER}</p>
           <h2 className="font-display mt-2 text-3xl font-bold md:text-4xl">{TESTI_PAGE.H2}</h2>

@@ -36,7 +36,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { alpha } from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
 import { ChevronDown, ListChecks, ListVideo, Pencil, PlusCircle, Trash2, UserPlus } from 'lucide-react';
 import { AdminDataTable, adminBodyRowSx, adminHeaderCellSx } from '../components/admin/AdminDataTable';
 import { AdminSectionCard } from '../components/admin/AdminSectionCard';
@@ -166,6 +166,11 @@ const INITIAL_COURSE_FORM = {
 };
 
 export function DashboardAdmin() {
+  const theme = useTheme();
+  const chartPrimary = theme.palette.primary.main;
+  const chartSecondary = theme.palette.secondary.main;
+  const chartAccent = theme.palette.info.main;
+
   const { session, user } = useAuth();
   const token = session?.access_token;
   const [tab, setTab] = useState('users');
@@ -691,12 +696,12 @@ export function DashboardAdmin() {
       <PageHeader title={DASH_ADMIN.TITLE} crumbs={[{ label: DASH_ADMIN.CRUMB, active: true }]} />
       <Box
         sx={{
-          bgcolor: (t) => alpha(t.palette.grey[500], 0.06),
-          py: { xs: 3, md: 4 },
+          bgcolor: 'background.default',
+          py: { xs: 3, md: 5 },
           minHeight: { xs: '50vh', md: '56vh' },
         }}
       >
-        <div className="container mx-auto max-w-6xl px-4">
+        <div className="container mx-auto max-w-6xl px-4 pb-2">
           <AdminShell tab={tab} onTabChange={setTab}>
             {tab === 'users' && (
               <Stack spacing={3}>
@@ -709,7 +714,7 @@ export function DashboardAdmin() {
                       mb: 3,
                     }}
                   >
-                    <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+                    <Paper elevation={0} sx={{ p: 2, borderRadius: 2 }}>
                       <Typography variant="caption" color="text.secondary" fontWeight={700}>
                         {DASH_ADMIN.USER_STATS_TOTAL}
                       </Typography>
@@ -717,7 +722,7 @@ export function DashboardAdmin() {
                         {userAnalytics.total}
                       </Typography>
                     </Paper>
-                    <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+                    <Paper elevation={0} sx={{ p: 2, borderRadius: 2 }}>
                       <Typography variant="caption" color="text.secondary" fontWeight={700}>
                         {DASH_ADMIN.USER_STATS_STUDENT_COUNT}
                       </Typography>
@@ -725,7 +730,7 @@ export function DashboardAdmin() {
                         {userAnalytics.students}
                       </Typography>
                     </Paper>
-                    <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+                    <Paper elevation={0} sx={{ p: 2, borderRadius: 2 }}>
                       <Typography variant="caption" color="text.secondary" fontWeight={700}>
                         {DASH_ADMIN.USER_STATS_ADMIN_COUNT}
                       </Typography>
@@ -742,7 +747,7 @@ export function DashboardAdmin() {
                       minHeight: 280,
                     }}
                   >
-                    <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 2, bgcolor: 'background.paper' }}>
+                    <Paper elevation={0} sx={{ p: 2.5, borderRadius: 2, bgcolor: 'background.paper' }}>
                       <Typography variant="subtitle1" className="font-display" sx={{ fontWeight: 800, mb: 1.5 }}>
                         {DASH_ADMIN.USER_CHART_BY_ROLE}
                       </Typography>
@@ -755,13 +760,13 @@ export function DashboardAdmin() {
                           <Bar
                             dataKey="count"
                             name={DASH_ADMIN.USER_CHART_LEGEND_COUNT}
-                            fill="#e8872a"
+                            fill={chartPrimary}
                             radius={[4, 4, 0, 0]}
                           />
                         </BarChart>
                       </ResponsiveContainer>
                     </Paper>
-                    <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 2, bgcolor: 'background.paper' }}>
+                    <Paper elevation={0} sx={{ p: 2.5, borderRadius: 2, bgcolor: 'background.paper' }}>
                       <Typography variant="subtitle1" className="font-display" sx={{ fontWeight: 800, mb: 1.5 }}>
                         {DASH_ADMIN.USER_CHART_SIGNUPS_30D}
                       </Typography>
@@ -775,7 +780,7 @@ export function DashboardAdmin() {
                             type="monotone"
                             dataKey="count"
                             name={DASH_ADMIN.USER_CHART_LEGEND_NEW_PER_DAY}
-                            stroke="#354056"
+                            stroke={chartSecondary}
                             strokeWidth={2}
                             dot
                           />
@@ -863,7 +868,7 @@ export function DashboardAdmin() {
                           mb: 3,
                         }}
                       >
-                        <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+                        <Paper elevation={0} sx={{ p: 2, borderRadius: 2 }}>
                           <Typography variant="caption" color="text.secondary" fontWeight={700}>
                             {DASH_ADMIN.COURSE_STATS_TOTAL_COURSES}
                           </Typography>
@@ -871,7 +876,7 @@ export function DashboardAdmin() {
                             {contentStats.summary.totalCourses}
                           </Typography>
                         </Paper>
-                        <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+                        <Paper elevation={0} sx={{ p: 2, borderRadius: 2 }}>
                           <Typography variant="caption" color="text.secondary" fontWeight={700}>
                             {DASH_ADMIN.COURSE_STATS_PUBLISHED_COUNT}
                           </Typography>
@@ -879,7 +884,7 @@ export function DashboardAdmin() {
                             {contentStats.summary.publishedCourses}
                           </Typography>
                         </Paper>
-                        <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+                        <Paper elevation={0} sx={{ p: 2, borderRadius: 2 }}>
                           <Typography variant="caption" color="text.secondary" fontWeight={700}>
                             {DASH_ADMIN.COURSE_STATS_LECTURES}
                           </Typography>
@@ -887,7 +892,7 @@ export function DashboardAdmin() {
                             {contentStats.summary.totalLectures}
                           </Typography>
                         </Paper>
-                        <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+                        <Paper elevation={0} sx={{ p: 2, borderRadius: 2 }}>
                           <Typography variant="caption" color="text.secondary" fontWeight={700}>
                             {DASH_ADMIN.COURSE_STATS_QUIZZES}
                           </Typography>
@@ -905,7 +910,7 @@ export function DashboardAdmin() {
                           mb: 2,
                         }}
                       >
-                        <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 2, bgcolor: 'background.paper' }}>
+                        <Paper elevation={0} sx={{ p: 2.5, borderRadius: 2, bgcolor: 'background.paper' }}>
                           <Typography variant="subtitle1" className="font-display" sx={{ fontWeight: 800, mb: 1.5 }}>
                             {DASH_ADMIN.COURSE_CHART_PUBLISH}
                           </Typography>
@@ -915,11 +920,11 @@ export function DashboardAdmin() {
                               <XAxis dataKey="name" tick={{ fontSize: 11 }} />
                               <YAxis allowDecimals={false} width={36} />
                               <RechartsTooltip />
-                              <Bar dataKey="count" name={DASH_ADMIN.USER_CHART_LEGEND_COUNT} fill="#e8872a" radius={[4, 4, 0, 0]} />
+                              <Bar dataKey="count" name={DASH_ADMIN.USER_CHART_LEGEND_COUNT} fill={chartPrimary} radius={[4, 4, 0, 0]} />
                             </BarChart>
                           </ResponsiveContainer>
                         </Paper>
-                        <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 2, bgcolor: 'background.paper' }}>
+                        <Paper elevation={0} sx={{ p: 2.5, borderRadius: 2, bgcolor: 'background.paper' }}>
                           <Typography variant="subtitle1" className="font-display" sx={{ fontWeight: 800, mb: 1.5 }}>
                             {DASH_ADMIN.COURSE_CHART_ACTIVITY_30D}
                           </Typography>
@@ -937,7 +942,7 @@ export function DashboardAdmin() {
                                 type="monotone"
                                 dataKey="courses"
                                 name={DASH_ADMIN.COURSE_CHART_LINE_NEW_COURSES}
-                                stroke="#e8872a"
+                                stroke={chartPrimary}
                                 strokeWidth={2}
                                 dot={{ r: 2 }}
                               />
@@ -945,7 +950,7 @@ export function DashboardAdmin() {
                                 type="monotone"
                                 dataKey="lectures"
                                 name={DASH_ADMIN.COURSE_CHART_LINE_NEW_LECTURES}
-                                stroke="#354056"
+                                stroke={chartSecondary}
                                 strokeWidth={2}
                                 dot={{ r: 2 }}
                               />
@@ -953,7 +958,7 @@ export function DashboardAdmin() {
                                 type="monotone"
                                 dataKey="quizzes"
                                 name={DASH_ADMIN.COURSE_CHART_LINE_NEW_QUIZZES}
-                                stroke="#7c9eb2"
+                                stroke={chartAccent}
                                 strokeWidth={2}
                                 dot={{ r: 2 }}
                               />
@@ -962,7 +967,7 @@ export function DashboardAdmin() {
                         </Paper>
                       </Box>
                       {courseTopByContent.length > 0 ? (
-                        <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 2, bgcolor: 'background.paper' }}>
+                        <Paper elevation={0} sx={{ p: 2.5, borderRadius: 2, bgcolor: 'background.paper' }}>
                           <Typography variant="subtitle1" className="font-display" sx={{ fontWeight: 800, mb: 1.5 }}>
                             {DASH_ADMIN.COURSE_CHART_TOP_CONTENT}
                           </Typography>
@@ -976,13 +981,13 @@ export function DashboardAdmin() {
                               <Bar
                                 dataKey="lectures"
                                 name={DASH_ADMIN.SUBTAB_LECTURES}
-                                fill="#e8872a"
+                                fill={chartPrimary}
                                 radius={[4, 4, 0, 0]}
                               />
                               <Bar
                                 dataKey="quizzes"
                                 name={DASH_ADMIN.SUBTAB_QUIZZES}
-                                fill="#7c9eb2"
+                                fill={chartAccent}
                                 radius={[4, 4, 0, 0]}
                               />
                             </BarChart>
@@ -1190,7 +1195,7 @@ export function DashboardAdmin() {
 
                     {selectedCourseId ? (
                       <>
-                        <Paper variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden', mb: 2 }}>
+                        <Paper elevation={0} sx={{ borderRadius: 2, overflow: 'hidden', mb: 2 }}>
                           <Tabs
                             value={courseSubTab}
                             onChange={(_, v) => setCourseSubTab(v)}
@@ -1591,7 +1596,7 @@ export function DashboardAdmin() {
                           mb: 3,
                         }}
                       >
-                        <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+                        <Paper elevation={0} sx={{ p: 2, borderRadius: 2 }}>
                           <Typography variant="caption" color="text.secondary" fontWeight={700}>
                             {DASH_ADMIN.QUIZ_ANALYTICS_SUMMARY_ATTEMPTS}
                           </Typography>
@@ -1599,7 +1604,7 @@ export function DashboardAdmin() {
                             {quizAnalytics.summary?.totalAttempts ?? 0}
                           </Typography>
                         </Paper>
-                        <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+                        <Paper elevation={0} sx={{ p: 2, borderRadius: 2 }}>
                           <Typography variant="caption" color="text.secondary" fontWeight={700}>
                             {DASH_ADMIN.QUIZ_ANALYTICS_SUMMARY_AVG}
                           </Typography>
@@ -1607,7 +1612,7 @@ export function DashboardAdmin() {
                             {quizAnalytics.summary?.avgPercent ?? 0}%
                           </Typography>
                         </Paper>
-                        <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+                        <Paper elevation={0} sx={{ p: 2, borderRadius: 2 }}>
                           <Typography variant="caption" color="text.secondary" fontWeight={700}>
                             {DASH_ADMIN.QUIZ_ANALYTICS_SUMMARY_STUDENTS}
                           </Typography>
@@ -1625,7 +1630,7 @@ export function DashboardAdmin() {
                           mb: 2,
                         }}
                       >
-                        <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 2, bgcolor: 'background.paper' }}>
+                        <Paper elevation={0} sx={{ p: 2.5, borderRadius: 2, bgcolor: 'background.paper' }}>
                           <Typography variant="subtitle1" className="font-display" sx={{ fontWeight: 800, mb: 1.5 }}>
                             {DASH_ADMIN.QUIZ_ANALYTICS_CHART_COURSE}
                           </Typography>
@@ -1647,20 +1652,20 @@ export function DashboardAdmin() {
                               <YAxis yAxisId="right" orientation="right" domain={[0, 100]} width={40} />
                               <RechartsTooltip />
                               <Legend />
-                              <Bar yAxisId="left" dataKey="attempts" name={DASH_ADMIN.CHART_ATTEMPTS} fill="#e8872a" radius={[4, 4, 0, 0]} />
+                              <Bar yAxisId="left" dataKey="attempts" name={DASH_ADMIN.CHART_ATTEMPTS} fill={chartPrimary} radius={[4, 4, 0, 0]} />
                               <Line
                                 yAxisId="right"
                                 type="monotone"
                                 dataKey="avgPercent"
                                 name={DASH_ADMIN.CHART_AVG_SUFFIX}
-                                stroke="#354056"
+                                stroke={chartSecondary}
                                 strokeWidth={2}
                                 dot={{ r: 3 }}
                               />
                             </ComposedChart>
                           </ResponsiveContainer>
                         </Paper>
-                        <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 2, bgcolor: 'background.paper' }}>
+                        <Paper elevation={0} sx={{ p: 2.5, borderRadius: 2, bgcolor: 'background.paper' }}>
                           <Typography variant="subtitle1" className="font-display" sx={{ fontWeight: 800, mb: 1.5 }}>
                             {DASH_ADMIN.QUIZ_ANALYTICS_CHART_TIMELINE}
                           </Typography>
@@ -1670,12 +1675,12 @@ export function DashboardAdmin() {
                               <XAxis dataKey="day" tick={{ fontSize: 10 }} angle={-35} textAnchor="end" height={52} />
                               <YAxis allowDecimals={false} width={36} />
                               <RechartsTooltip />
-                              <Line type="monotone" dataKey="count" name={DASH_ADMIN.CHART_ATTEMPTS} stroke="#354056" strokeWidth={2} dot />
+                              <Line type="monotone" dataKey="count" name={DASH_ADMIN.CHART_ATTEMPTS} stroke={chartSecondary} strokeWidth={2} dot />
                             </LineChart>
                           </ResponsiveContainer>
                         </Paper>
                       </Box>
-                      <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 2, bgcolor: 'background.paper', mb: 2 }}>
+                      <Paper elevation={0} sx={{ p: 2.5, borderRadius: 2, bgcolor: 'background.paper', mb: 2 }}>
                         <Typography variant="subtitle1" className="font-display" sx={{ fontWeight: 800, mb: 1.5 }}>
                           {DASH_ADMIN.QUIZ_ANALYTICS_CHART_SCORE}
                         </Typography>
@@ -1685,7 +1690,7 @@ export function DashboardAdmin() {
                             <XAxis dataKey="band" tick={{ fontSize: 11 }} />
                             <YAxis allowDecimals={false} width={36} />
                             <RechartsTooltip />
-                            <Bar dataKey="count" name={DASH_ADMIN.CHART_ATTEMPTS} fill="#7c9eb2" radius={[4, 4, 0, 0]} />
+                            <Bar dataKey="count" name={DASH_ADMIN.CHART_ATTEMPTS} fill={chartAccent} radius={[4, 4, 0, 0]} />
                           </BarChart>
                         </ResponsiveContainer>
                       </Paper>
@@ -1736,7 +1741,7 @@ export function DashboardAdmin() {
                   mb: 2,
                 }}
               >
-                <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 2, bgcolor: 'background.paper' }}>
+                <Paper elevation={0} sx={{ p: 2.5, borderRadius: 2, bgcolor: 'background.paper' }}>
                   <Typography variant="subtitle1" className="font-display" sx={{ fontWeight: 800, mb: 1.5 }}>
                     {DASH_ADMIN.ENROLL_STATS_TITLE}
                   </Typography>
@@ -1755,11 +1760,11 @@ export function DashboardAdmin() {
                       <XAxis dataKey="name" interval={0} angle={-28} textAnchor="end" height={56} tick={{ fontSize: 11 }} />
                       <YAxis allowDecimals={false} width={36} />
                       <RechartsTooltip />
-                      <Bar dataKey="count" name={DASH_ADMIN.CHART_STUDENTS} fill="#e8872a" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="count" name={DASH_ADMIN.CHART_STUDENTS} fill={chartPrimary} radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </Paper>
-                <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 2, bgcolor: 'background.paper' }}>
+                <Paper elevation={0} sx={{ p: 2.5, borderRadius: 2, bgcolor: 'background.paper' }}>
                   <Typography variant="subtitle1" className="font-display" sx={{ fontWeight: 800, mb: 1.5 }}>
                     {DASH_ADMIN.ENROLL_TIMELINE_TITLE}
                   </Typography>
@@ -1769,7 +1774,7 @@ export function DashboardAdmin() {
                       <XAxis dataKey="day" tick={{ fontSize: 10 }} angle={-35} textAnchor="end" height={52} />
                       <YAxis allowDecimals={false} width={36} />
                       <RechartsTooltip />
-                      <Line type="monotone" dataKey="count" name={DASH_ADMIN.CHART_STUDENTS} stroke="#354056" strokeWidth={2} dot />
+                      <Line type="monotone" dataKey="count" name={DASH_ADMIN.CHART_STUDENTS} stroke={chartSecondary} strokeWidth={2} dot />
                     </LineChart>
                   </ResponsiveContainer>
                 </Paper>

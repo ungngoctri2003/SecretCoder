@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- adminHeaderCellSx/adminBodyRowSx consumed by DashboardAdmin */
 import { Paper, Table, TableContainer } from '@mui/material';
 
 /** Table head cells: sx={{ ...adminHeaderCellSx, ... }} */
@@ -24,11 +25,9 @@ export function AdminDataTable({ children }) {
       elevation={0}
       sx={{
         borderRadius: 2,
-        border: 1,
-        borderColor: 'divider',
         overflow: 'auto',
         maxWidth: '100%',
-        boxShadow: '0 1px 2px rgba(28, 36, 51, 0.05)',
+        boxShadow: (t) => t.shadows[1],
       }}
     >
       <Table size="small" stickyHeader>

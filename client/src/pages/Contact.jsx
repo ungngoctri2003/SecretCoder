@@ -56,7 +56,7 @@ export function Contact() {
   return (
     <>
       <PageHeader title={CONTACT_PAGE.TITLE} crumbs={[{ label: CONTACT_PAGE.CRUMB, active: true }]} />
-      <div className="container mx-auto max-w-6xl px-4 py-12">
+      <div className="container mx-auto max-w-6xl px-4 py-16">
         <h2 className="font-display text-center text-3xl font-bold">{CONTACT_PAGE.H2}</h2>
         <div className="mt-12 grid gap-12 lg:grid-cols-2">
           <div>
@@ -92,7 +92,7 @@ export function Contact() {
               </Box>
             </Box>
           </div>
-          <Card component="form" onSubmit={onSubmit} variant="outlined" sx={{ boxShadow: 3 }}>
+          <Card component="form" onSubmit={onSubmit} elevation={0} sx={{ boxShadow: (t) => t.shadows[3] }}>
             <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' } }}>
                 <TextField label={CONTACT_PAGE.YOUR_NAME} required fullWidth value={name} onChange={(e) => setName(e.target.value)} />

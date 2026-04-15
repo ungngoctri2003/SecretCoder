@@ -20,7 +20,7 @@ export function AuthPageShell({ pageTitle, crumbs, children }) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          bgcolor: (t) => (t.palette.mode === 'light' ? 'grey.50' : 'background.default'),
+          bgcolor: 'background.default',
           backgroundImage: (t) =>
             `radial-gradient(ellipse 120% 90% at 50% -25%, ${alpha(t.palette.primary.main, 0.2)}, transparent 52%)`,
         }}

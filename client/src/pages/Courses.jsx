@@ -31,14 +31,21 @@ export function Courses() {
   return (
     <>
       <PageHeader title={COURSES_PAGE.TITLE} crumbs={[{ label: COURSES_PAGE.CRUMB, active: true }]} />
-      <div className="container mx-auto max-w-6xl px-4 py-12">
+      <div className="container mx-auto max-w-6xl px-4 py-16">
         <div className="text-center">
           <p className="text-sm font-semibold uppercase tracking-wide text-primary">{COURSES_PAGE.CATEGORIES}</p>
           <h2 className="font-display mt-2 text-3xl font-bold md:text-4xl">{COURSES_PAGE.TOPICS}</h2>
         </div>
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {categories.map((cat) => (
-            <Card key={cat.id} variant="outlined" sx={{ transition: 'box-shadow 0.2s', '&:hover': { boxShadow: 4 } }}>
+            <Card
+              key={cat.id}
+              elevation={0}
+              sx={{
+                transition: 'box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease',
+                '&:hover': { boxShadow: (t) => t.shadows[4], transform: 'translateY(-2px)', borderColor: 'primary.main' },
+              }}
+            >
               <Box sx={{ px: 2, pt: 2 }}>
                 {cat.image_url ? (
                   <Box
@@ -73,7 +80,7 @@ export function Courses() {
         </div>
       </div>
 
-      <div className="container mx-auto max-w-6xl px-4 pb-20">
+      <div className="container mx-auto max-w-6xl px-4 pb-24 pt-4">
         <div className="text-center">
           <p className="text-sm font-semibold uppercase tracking-wide text-primary">{COURSES_PAGE.TITLE}</p>
           <h2 className="font-display mt-2 text-3xl font-bold md:text-4xl">{COURSES_PAGE.ALL_COURSES}</h2>

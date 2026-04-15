@@ -129,9 +129,11 @@ export function Navbar() {
         zIndex: (t) => t.zIndex.drawer + 1,
         borderBottom: 1,
         borderColor: 'divider',
-        bgcolor: 'background.paper',
-        backdropFilter: 'blur(8px)',
-        backgroundImage: 'linear-gradient(rgba(255,255,255,0.92), rgba(255,255,255,0.92))',
+        bgcolor: (t) => alpha(t.palette.background.paper, 0.86),
+        backdropFilter: 'blur(12px) saturate(1.2)',
+        backgroundImage: (t) =>
+          `linear-gradient(180deg, ${alpha(t.palette.background.paper, 0.98)} 0%, ${alpha(t.palette.background.paper, 0.88)} 100%)`,
+        boxShadow: (t) => `0 1px 0 ${alpha(t.palette.common.black, 0.04)}`,
         transition: `border-color 0.35s ${navEase}, box-shadow 0.35s ${navEase}`,
       }}
     >

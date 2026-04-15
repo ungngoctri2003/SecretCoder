@@ -22,11 +22,9 @@ export function AdminShell({ tab, onTabChange, children }) {
       elevation={0}
       sx={{
         borderRadius: 3,
-        border: 1,
-        borderColor: 'divider',
         overflow: 'hidden',
         bgcolor: 'background.paper',
-        boxShadow: '0 2px 12px rgba(28, 36, 51, 0.07)',
+        boxShadow: (t) => t.shadows[2],
       }}
     >
       <Tabs

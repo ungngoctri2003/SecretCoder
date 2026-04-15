@@ -31,7 +31,7 @@ export function Team() {
   return (
     <>
       <PageHeader title={TEAM_PAGE.TITLE} crumbs={[{ label: TEAM_PAGE.CRUMB, active: true }]} />
-      <div className="container mx-auto max-w-6xl px-4 py-12">
+      <div className="container mx-auto max-w-6xl px-4 py-16">
         <div className="text-center">
           <p className="text-sm font-semibold uppercase tracking-wide text-primary">{TEAM_PAGE.KICKER}</p>
           <h2 className="font-display mt-2 text-3xl font-bold md:text-4xl">{TEAM_PAGE.H2}</h2>

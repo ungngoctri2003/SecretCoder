@@ -11,12 +11,10 @@ export function AdminSectionCard({ overline, title, action, children }) {
     <Card
       elevation={0}
       sx={{
-        border: 1,
-        borderColor: 'divider',
         borderRadius: 3,
         overflow: 'hidden',
         bgcolor: 'background.paper',
-        boxShadow: '0 1px 3px rgba(28, 36, 51, 0.06)',
+        boxShadow: (t) => t.shadows[1],
       }}
     >
       <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>

@@ -154,8 +154,29 @@ export function QuizDetail() {
             { label: QUIZ_DETAIL.NOT_FOUND, active: true },
           ]}
         />
-        <Box className="container mx-auto max-w-2xl px-4 py-12">
-          <Alert severity="warning">{err || COMMON.LOADING}</Alert>
+        <Box className="container mx-auto max-w-2xl px-4 py-16">
+          {!course && !err ? (
+            <Paper
+              elevation={0}
+              sx={{
+                p: 5,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 2,
+                borderStyle: 'dashed',
+              }}
+            >
+              <CircularProgress size={32} />
+              <Typography color="text.secondary" fontWeight={500}>
+                {COMMON.LOADING}
+              </Typography>
+            </Paper>
+          ) : (
+            <Alert severity="warning" sx={{ borderRadius: 2 }}>
+              {err || COMMON.LOADING}
+            </Alert>
+          )}
           <Button component={Link} to="/courses" variant="text" color="primary" sx={{ mt: 2, px: 0 }}>
             {COURSE_DETAIL.BACK}
           </Button>
@@ -212,7 +233,7 @@ export function QuizDetail() {
 
         {showContentSpinner ? (
           <Paper
-            variant="outlined"
+            elevation={0}
             sx={{
               p: 4,
               borderRadius: 3,
@@ -220,6 +241,7 @@ export function QuizDetail() {
               alignItems: 'center',
               gap: 2,
               borderStyle: 'dashed',
+              bgcolor: 'action.hover',
             }}
           >
             <CircularProgress size={28} />
@@ -254,7 +276,7 @@ export function QuizDetail() {
                   theme.palette.mode === 'dark'
                     ? alpha(theme.palette.primary.main, 0.1)
                     : `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.07)} 0%, ${alpha(theme.palette.primary.light, 0.04)} 42%, ${theme.palette.background.paper} 100%)`,
-                boxShadow: theme.palette.mode === 'dark' ? 'none' : `0 20px 48px ${alpha(theme.palette.common.black, 0.06)}`,
+                boxShadow: theme.palette.mode === 'dark' ? 'none' : theme.shadows[3],
               })}
             >
               <Typography
