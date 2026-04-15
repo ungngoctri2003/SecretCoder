@@ -65,8 +65,12 @@ export function Signup() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      const data = await signUp(email, password, fullName);
+      const { data, profile: loadedProfile } = await signUp(email, password, fullName);
       if (data?.session) {
+        if (!loadedProfile) {
+          toast.error(ERR.PROFILE_NOT_LOADED);
+          return;
+        }
         toast.success(AUTH.SIGNUP_SUCCESS);
         navigate(from, { replace: true });
       } else {

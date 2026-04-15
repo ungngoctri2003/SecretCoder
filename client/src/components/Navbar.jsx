@@ -24,7 +24,7 @@ const navTransition = [
 ].join(', ');
 
 const navButtonSx = {
-  fontFamily: "'Nunito', ui-sans-serif, system-ui, sans-serif",
+  fontFamily: "'Outfit', ui-sans-serif, system-ui, sans-serif",
   fontWeight: 600,
   letterSpacing: '0.02em',
   minHeight: 44,
@@ -152,7 +152,7 @@ export function Navbar() {
             sx={{
               textTransform: 'none',
               gap: { xs: 1.25, md: 1.5 },
-              fontFamily: "'Nunito', ui-sans-serif, system-ui, sans-serif",
+              fontFamily: "'Outfit', ui-sans-serif, system-ui, sans-serif",
               fontWeight: 800,
               fontSize: { xs: '1.35rem', md: '1.75rem' },
               letterSpacing: '-0.02em',

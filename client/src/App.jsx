@@ -10,6 +10,8 @@ import { Home } from './pages/Home';
 import { About } from './pages/About';
 import { Courses } from './pages/Courses';
 import { CourseDetail } from './pages/CourseDetail';
+import { LectureDetail } from './pages/LectureDetail';
+import { QuizDetail } from './pages/QuizDetail';
 import { Contact } from './pages/Contact';
 import { Team } from './pages/Team';
 import { Testimonials } from './pages/Testimonials';
@@ -32,6 +34,8 @@ export default function App() {
             <Route index element={<Home />} />
             <Route path="about" element={<About />} />
             <Route path="courses" element={<Courses />} />
+            <Route path="courses/:slug/lecture/:lectureId" element={<LectureDetail />} />
+            <Route path="courses/:slug/quiz/:quizId" element={<QuizDetail />} />
             <Route path="courses/:slug" element={<CourseDetail />} />
             <Route path="contact" element={<Contact />} />
             <Route path="team" element={<Team />} />

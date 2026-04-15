@@ -1,13 +1,14 @@
-import { BarChart3, BookOpen, Users } from 'lucide-react';
+import { BarChart3, BookOpen, ListChecks, Users } from 'lucide-react';
 import { Box, Divider, Paper, Tab, Tabs } from '@mui/material';
 import { DASH_ADMIN } from '../../strings/vi';
 
-const TAB_KEYS = ['users', 'courses', 'enrollments'];
+const TAB_KEYS = ['users', 'courses', 'enrollments', 'quiz_stats'];
 
 const TAB_ICONS = {
   users: <Users size={18} strokeWidth={2} aria-hidden />,
   courses: <BookOpen size={18} strokeWidth={2} aria-hidden />,
   enrollments: <BarChart3 size={18} strokeWidth={2} aria-hidden />,
+  quiz_stats: <ListChecks size={18} strokeWidth={2} aria-hidden />,
 };
 
 /**

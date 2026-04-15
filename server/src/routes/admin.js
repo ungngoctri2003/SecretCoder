@@ -145,6 +145,87 @@ r.delete('/categories/:id', async (req, res) => {
 });
 
 // Courses (admin full)
+r.get('/content-stats', async (_req, res) => {
+  const [coursesRes, lecturesRes, quizzesRes] = await Promise.all([
+    supabaseAdmin.from('courses').select('id, title, published, created_at'),
+    supabaseAdmin.from('course_lectures').select('course_id, created_at'),
+    supabaseAdmin.from('course_quizzes').select('course_id, created_at'),
+  ]);
+  if (coursesRes.error) return res.status(500).json({ error: coursesRes.error.message });
+  if (lecturesRes.error) return res.status(500).json({ error: lecturesRes.error.message });
+  if (quizzesRes.error) return res.status(500).json({ error: quizzesRes.error.message });
+
+  const courses = coursesRes.data || [];
+  const lectures = lecturesRes.data || [];
+  const quizzes = quizzesRes.data || [];
+
+  const publishedCourses = courses.filter((c) => c.published).length;
+  const summary = {
+    totalCourses: courses.length,
+    publishedCourses,
+    draftCourses: courses.length - publishedCourses,
+    totalLectures: lectures.length,
+    totalQuizzes: quizzes.length,
+  };
+
+  const lectureByCourse = new Map();
+  for (const row of lectures) {
+    const id = row.course_id;
+    if (!id) continue;
+    lectureByCourse.set(id, (lectureByCourse.get(id) || 0) + 1);
+  }
+  const quizByCourse = new Map();
+  for (const row of quizzes) {
+    const id = row.course_id;
+    if (!id) continue;
+    quizByCourse.set(id, (quizByCourse.get(id) || 0) + 1);
+  }
+
+  const byCourse = courses
+    .map((c) => ({
+      id: c.id,
+      title: c.title || '—',
+      lectures: lectureByCourse.get(c.id) || 0,
+      quizzes: quizByCourse.get(c.id) || 0,
+    }))
+    .sort((a, b) => b.lectures + b.quizzes - (a.lectures + a.quizzes))
+    .slice(0, 8);
+
+  const dayKeys = [];
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  for (let i = 29; i >= 0; i -= 1) {
+    const d = new Date(today);
+    d.setUTCDate(d.getUTCDate() - i);
+    dayKeys.push(d.toISOString().slice(0, 10));
+  }
+  const timelineMap = new Map(dayKeys.map((k) => [k, { day: k, courses: 0, lectures: 0, quizzes: 0 }]));
+  for (const c of courses) {
+    if (!c.created_at) continue;
+    const key = new Date(c.created_at).toISOString().slice(0, 10);
+    const row = timelineMap.get(key);
+    if (row) row.courses += 1;
+  }
+  for (const row of lectures) {
+    if (!row.created_at) continue;
+    const key = new Date(row.created_at).toISOString().slice(0, 10);
+    const t = timelineMap.get(key);
+    if (t) t.lectures += 1;
+  }
+  for (const row of quizzes) {
+    if (!row.created_at) continue;
+    const key = new Date(row.created_at).toISOString().slice(0, 10);
+    const t = timelineMap.get(key);
+    if (t) t.quizzes += 1;
+  }
+  const timeline = [...timelineMap.values()].map((row) => {
+    const [, m, d] = row.day.split('-');
+    return { day: `${d}/${m}`, courses: row.courses, lectures: row.lectures, quizzes: row.quizzes };
+  });
+
+  res.json({ summary, byCourse, timeline });
+});
+
 r.get('/courses', async (req, res) => {
   const { data, error } = await supabaseAdmin
     .from('courses')
@@ -268,6 +349,112 @@ r.get('/enrollments', async (_req, res) => {
   res.json({
     enrollments: list,
     stats: { byCourse, byDay },
+  });
+});
+
+r.get('/quiz-analytics', async (_req, res) => {
+  const { data: rows, error } = await supabaseAdmin
+    .from('quiz_attempts')
+    .select(
+      `
+      id,
+      student_id,
+      quiz_id,
+      course_id,
+      correct,
+      total,
+      percent,
+      submitted_at,
+      course_quizzes ( title ),
+      courses ( title, slug ),
+      profiles ( full_name, email )
+    `,
+    )
+    .order('submitted_at', { ascending: false })
+    .limit(2000);
+  if (error) return res.status(500).json({ error: error.message });
+  const list = (rows || []).map((row) => ({
+    id: row.id,
+    student_id: row.student_id,
+    quiz_id: row.quiz_id,
+    course_id: row.course_id,
+    correct: row.correct,
+    total: row.total,
+    percent: row.percent,
+    submitted_at: row.submitted_at,
+    quiz_title: row.course_quizzes?.title ?? null,
+    course_title: row.courses?.title ?? null,
+    course_slug: row.courses?.slug ?? null,
+    student_name: row.profiles?.full_name ?? null,
+    student_email: row.profiles?.email ?? null,
+  }));
+
+  const n = list.length;
+  const avgPercent = n === 0 ? 0 : Math.round(list.reduce((s, r) => s + (r.percent || 0), 0) / n);
+  const distinctStudents = new Set(list.map((r) => r.student_id)).size;
+
+  const byCourseMap = new Map();
+  for (const row of list) {
+    const cid = row.course_id;
+    if (!cid) continue;
+    const cur = byCourseMap.get(cid) || {
+      course_id: cid,
+      title: row.course_title || '—',
+      slug: row.course_slug || '',
+      attempts: 0,
+      percentSum: 0,
+    };
+    cur.attempts += 1;
+    cur.percentSum += row.percent || 0;
+    byCourseMap.set(cid, cur);
+  }
+  const byCourse = [...byCourseMap.values()]
+    .map((c) => ({
+      course_id: c.course_id,
+      title: c.title,
+      slug: c.slug,
+      attempts: c.attempts,
+      avgPercent: c.attempts === 0 ? 0 : Math.round(c.percentSum / c.attempts),
+    }))
+    .sort((a, b) => b.attempts - a.attempts);
+
+  const byDayMap = new Map();
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  for (let i = 29; i >= 0; i -= 1) {
+    const d = new Date(today);
+    d.setUTCDate(d.getUTCDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    byDayMap.set(key, 0);
+  }
+  for (const row of list) {
+    if (!row.submitted_at) continue;
+    const key = new Date(row.submitted_at).toISOString().slice(0, 10);
+    if (byDayMap.has(key)) byDayMap.set(key, (byDayMap.get(key) || 0) + 1);
+  }
+  const byDay = [...byDayMap.entries()].map(([day, count]) => ({ day, count }));
+
+  const bands = [
+    { key: '0–49%', min: 0, max: 49, count: 0 },
+    { key: '50–69%', min: 50, max: 69, count: 0 },
+    { key: '70–89%', min: 70, max: 89, count: 0 },
+    { key: '90–100%', min: 90, max: 100, count: 0 },
+  ];
+  for (const row of list) {
+    const p = row.percent ?? 0;
+    const b = bands.find((x) => p >= x.min && p <= x.max);
+    if (b) b.count += 1;
+  }
+  const byScoreBand = bands.map(({ key, count }) => ({ band: key, count }));
+
+  res.json({
+    attempts: list,
+    summary: {
+      totalAttempts: n,
+      avgPercent,
+      distinctStudents,
+    },
+    stats: { byCourse, byDay, byScoreBand },
   });
 });
 

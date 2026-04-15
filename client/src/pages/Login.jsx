@@ -65,7 +65,11 @@ export function Login() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await signIn(email, password);
+      const { profile: loadedProfile } = await signIn(email, password);
+      if (!loadedProfile) {
+        toast.error(ERR.PROFILE_NOT_LOADED);
+        return;
+      }
       toast.success(AUTH.LOGIN_SUCCESS);
       navigate(from, { replace: true });
     } catch (err) {

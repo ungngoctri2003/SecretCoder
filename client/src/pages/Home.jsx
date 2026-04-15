@@ -1,11 +1,33 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Box, Button, IconButton, Typography } from '@mui/material';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardActionArea,
+  IconButton,
+  Paper,
+  Typography,
+} from '@mui/material';
+import {
+  Check,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Globe,
+  GraduationCap,
+  Handshake,
+  Monitor,
+} from 'lucide-react';
+import { CourseCatalogCard } from '../components/CourseCatalogCard';
 import { TeamMemberGrid } from '../components/TeamMemberGrid';
 import { VI_TEAM_TEACHERS } from '../data/viTeamTeachers';
 import { apiFetch } from '../lib/api';
-import { HOME, TEAM_PAGE } from '../strings/vi';
+import { COURSES_PAGE, ERR, HOME, TEAM_PAGE } from '../strings/vi';
 
 const slides = [
   {
@@ -38,9 +60,23 @@ const carouselBtnSx = {
   '&:hover': { bgcolor: 'rgba(0,0,0,0.28)' },
 };
 
+const featureIcons = [GraduationCap, Handshake, Globe, Monitor];
+
+const featureCopy = [
+  { title: HOME.FEATURE1_TITLE, text: HOME.FEATURE1_TEXT },
+  { title: HOME.FEATURE2_TITLE, text: HOME.FEATURE2_TEXT },
+  { title: HOME.FEATURE3_TITLE, text: HOME.FEATURE3_TEXT },
+  { title: HOME.FEATURE4_TITLE, text: HOME.FEATURE4_TEXT },
+];
+
+const FEATURED_COURSE_COUNT = 6;
+
 export function Home() {
   const [index, setIndex] = useState(0);
   const [teamPreview, setTeamPreview] = useState([]);
+  const [categoriesPreview, setCategoriesPreview] = useState([]);
+  const [featuredCourses, setFeaturedCourses] = useState([]);
+  const [catalogErr, setCatalogErr] = useState('');
 
   useEffect(() => {
     const t = window.setInterval(() => setIndex((i) => (i + 1) % slides.length), 6500);
@@ -57,6 +93,30 @@ export function Home() {
         if (!cancelled) setTeamPreview(merged.slice(0, 4));
       } catch {
         if (!cancelled) setTeamPreview(VI_TEAM_TEACHERS.slice(0, 4));
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const [c, cat] = await Promise.all([apiFetch('/api/courses'), apiFetch('/api/categories')]);
+        if (cancelled) return;
+        const courses = Array.isArray(c) ? c : [];
+        const categories = Array.isArray(cat) ? cat : [];
+        setFeaturedCourses(courses.slice(0, FEATURED_COURSE_COUNT));
+        setCategoriesPreview(categories.slice(0, 8));
+        setCatalogErr('');
+      } catch (e) {
+        if (!cancelled) {
+          setCatalogErr(e.message || ERR.LOAD);
+          setFeaturedCourses([]);
+          setCategoriesPreview([]);
+        }
       }
     })();
     return () => {
@@ -130,10 +190,7 @@ export function Home() {
         <IconButton type="button" aria-label={HOME.NEXT_SLIDE} onClick={next} sx={{ ...carouselBtnSx, right: 8 }}>
           <ChevronRight className="h-8 w-8" />
         </IconButton>
-        <Box
-          className="absolute bottom-4 left-1/2 z-20 flex gap-2"
-          sx={{ transform: 'translateX(-50%)' }}
-        >
+        <Box className="absolute bottom-4 left-1/2 z-20 flex gap-2" sx={{ transform: 'translateX(-50%)' }}>
           {slides.map((_, i) => (
             <button
               key={i}
@@ -151,12 +208,158 @@ export function Home() {
         </Box>
       </Box>
 
-      <section className="container mx-auto max-w-6xl px-4 py-14 text-center">
-        <p className="text-sm font-semibold uppercase tracking-wide text-primary">{HOME.SECTION_COURSES}</p>
-        <h2 className="font-display mt-2 text-3xl font-bold text-base-content md:text-4xl">{HOME.POPULAR_COURSES}</h2>
-        <Button component={Link} to="/courses" variant="contained" color="primary" size="large" sx={{ mt: 4, minWidth: 200 }}>
-          {HOME.VIEW_ALL_COURSES}
-        </Button>
+      <section className="bg-[var(--mui-palette-background-default)] py-16">
+        <div className="container mx-auto max-w-6xl px-4 text-center">
+          <h2 className="font-display text-3xl font-bold text-base-content md:text-4xl">{HOME.FEATURES_TITLE}</h2>
+          <p className="mx-auto mt-3 max-w-2xl text-base-content/80">{HOME.FEATURES_SUB}</p>
+          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {featureCopy.map((item, i) => {
+              const Icon = featureIcons[i];
+              return (
+                <Paper
+                  key={item.title}
+                  elevation={0}
+                  className="h-full text-left"
+                  sx={{
+                    p: 3,
+                    borderRadius: 2,
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    boxShadow: '0 4px 24px rgba(28, 36, 51, 0.06)',
+                  }}
+                >
+                  <Box
+                    className="mb-4 inline-flex rounded-xl p-3"
+                    sx={{ bgcolor: 'color-mix(in oklab, var(--mui-palette-primary-main) 12%, transparent)' }}
+                  >
+                    <Icon className="h-7 w-7" style={{ color: 'var(--mui-palette-primary-main)' }} aria-hidden />
+                  </Box>
+                  <Typography component="h3" className="font-display text-lg font-bold text-base-content">
+                    {item.title}
+                  </Typography>
+                  <Typography component="p" className="mt-2 text-sm text-base-content/80">
+                    {item.text}
+                  </Typography>
+                </Paper>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="container mx-auto max-w-6xl px-4 py-16">
+        <div className="grid items-center gap-10 md:grid-cols-2">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-2xl shadow-xl">
+            <Box component="img" src="/img/about.jpg" alt="" sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </div>
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wide text-primary">{HOME.ABOUT_SECTION_KICKER}</p>
+            <h2 className="font-display mt-2 text-3xl font-bold text-base-content md:text-4xl">{HOME.ABOUT_SECTION_H2}</h2>
+            <p className="mt-4 text-base-content/85">{HOME.ABOUT_SECTION_P}</p>
+            <ul className="mt-6 grid gap-3 sm:grid-cols-2">
+              {HOME.ABOUT_SECTION_BULLETS.map((line) => (
+                <li key={line} className="flex gap-2 text-sm text-base-content/90">
+                  <Check className="mt-0.5 h-5 w-5 shrink-0" style={{ color: 'var(--mui-palette-primary-main)' }} aria-hidden />
+                  <span>{line}</span>
+                </li>
+              ))}
+            </ul>
+            <Button component={Link} to="/about" variant="contained" color="primary" size="large" sx={{ mt: 4 }}>
+              {HOME.LEARN_MORE}
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-[var(--mui-palette-background-default)] py-16">
+        <div className="container mx-auto max-w-6xl px-4">
+          <div className="grid items-center gap-10 md:grid-cols-2">
+            <div className="order-2 md:order-1">
+              <h2 className="font-display text-3xl font-bold text-base-content md:text-4xl">{HOME.PROGRAMS_CTA_H2}</h2>
+              <p className="mt-4 text-base-content/85">{HOME.PROGRAMS_CTA_SUB}</p>
+              <Button component={Link} to="/signup" variant="contained" color="primary" size="large" sx={{ mt: 4 }}>
+                {HOME.REGISTER_NOW}
+              </Button>
+            </div>
+            <div className="relative order-1 aspect-[4/3] overflow-hidden rounded-2xl shadow-xl md:order-2">
+              <Box component="img" src="/img/ready.jpg" alt="" sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="container mx-auto max-w-6xl px-4 py-16">
+        <div className="text-center">
+          <p className="text-sm font-semibold uppercase tracking-wide text-primary">{HOME.MAJORS_KICKER}</p>
+          <h2 className="font-display mt-2 text-3xl font-bold text-base-content md:text-4xl">{HOME.MAJORS_H2}</h2>
+        </div>
+        {catalogErr ? (
+          <Alert severity="error" sx={{ mt: 4 }} role="alert">
+            {catalogErr}
+          </Alert>
+        ) : null}
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {categoriesPreview.map((cat) => (
+            <Card key={cat.id} variant="outlined" sx={{ borderRadius: 2, transition: 'box-shadow 0.2s', '&:hover': { boxShadow: 3 } }}>
+              <CardActionArea component={Link} to="/courses" sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2, p: 2 }}>
+                {cat.image_url ? (
+                  <Box
+                    component="img"
+                    src={cat.image_url}
+                    alt=""
+                    sx={{ width: 52, height: 52, flexShrink: 0, borderRadius: 1.5, objectFit: 'contain' }}
+                  />
+                ) : (
+                  <Box
+                    sx={{
+                      width: 52,
+                      height: 52,
+                      flexShrink: 0,
+                      borderRadius: 1.5,
+                      bgcolor: 'action.hover',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      typography: 'caption',
+                      fontWeight: 700,
+                      color: 'text.secondary',
+                    }}
+                  >
+                    {cat.name?.slice(0, 2)}
+                  </Box>
+                )}
+                <Typography component="h3" className="font-display text-left text-base font-bold text-base-content">
+                  {cat.name}
+                </Typography>
+              </CardActionArea>
+            </Card>
+          ))}
+        </div>
+        {!catalogErr && categoriesPreview.length === 0 ? (
+          <p className="mt-8 text-center text-base-content/60">{COURSES_PAGE.EMPTY}</p>
+        ) : null}
+      </section>
+
+      <section className="bg-[var(--mui-palette-background-default)] py-16">
+        <div className="container mx-auto max-w-6xl px-4">
+          <div className="text-center">
+            <p className="text-sm font-semibold uppercase tracking-wide text-primary">{HOME.FEATURED_PROGRAMS_KICKER}</p>
+            <h2 className="font-display mt-2 text-3xl font-bold text-base-content md:text-4xl">{HOME.FEATURED_PROGRAMS_H2}</h2>
+          </div>
+          <div className="mt-10 grid gap-8 sm:grid-cols-2 xl:grid-cols-3">
+            {featuredCourses.map((course) => (
+              <CourseCatalogCard key={course.id} course={course} />
+            ))}
+          </div>
+          {!catalogErr && featuredCourses.length === 0 ? (
+            <p className="mt-8 text-center text-base-content/60">{COURSES_PAGE.EMPTY}</p>
+          ) : null}
+          <div className="mt-10 text-center">
+            <Button component={Link} to="/courses" variant="contained" color="primary" size="large" sx={{ minWidth: 200 }}>
+              {HOME.VIEW_ALL_COURSES}
+            </Button>
+          </div>
+        </div>
       </section>
 
       {teamPreview.length > 0 ? (
@@ -202,6 +405,40 @@ export function Home() {
           </div>
         </div>
       </Box>
+
+      <section className="container mx-auto max-w-3xl px-4 py-16">
+        <h2 className="font-display text-center text-3xl font-bold text-base-content md:text-4xl">{HOME.FAQ_TITLE}</h2>
+        <Box className="mt-8" sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          {HOME.FAQ_ITEMS.map((item, i) => (
+            <Accordion
+              key={item.q}
+              defaultExpanded={i === 0}
+              disableGutters
+              elevation={0}
+              sx={{
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: '10px !important',
+                '&:before': { display: 'none' },
+                overflow: 'hidden',
+              }}
+            >
+              <AccordionSummary
+                expandIcon={<ChevronDown className="h-5 w-5 text-base-content/60" aria-hidden />}
+                aria-controls={`home-faq-${i}`}
+                id={`home-faq-header-${i}`}
+              >
+                <Typography component="span" className="font-display font-semibold text-base-content">
+                  {item.q}
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails id={`home-faq-${i}`}>
+                <Typography color="text.secondary">{item.a}</Typography>
+              </AccordionDetails>
+            </Accordion>
+          ))}
+        </Box>
+      </section>
     </>
   );
 }

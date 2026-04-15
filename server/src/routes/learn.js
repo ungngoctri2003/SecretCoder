@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { requireAuth, requireRole } from '../middleware/auth.js';
 import { supabaseAdmin } from '../supabase.js';
-import { loadCourseLecturesAndQuizzes, scoreQuizSubmission } from '../lib/courseContent.js';
+import { insertQuizAttempt, loadCourseLecturesAndQuizzes, scoreQuizSubmission } from '../lib/courseContent.js';
 
 const r = Router();
 
@@ -53,7 +53,55 @@ r.post('/courses/:slug/quizzes/:quizId/submit', requireAuth, requireRole('studen
     if (result.error) {
       return res.status(result.status).json({ error: result.error });
     }
+    try {
+      await insertQuizAttempt(req.user.id, quizId, gate.course.id, {
+        correct: result.correct,
+        total: result.total,
+        percent: result.percent,
+      });
+    } catch (e) {
+      return res.status(500).json({ error: e.message || 'Failed to save quiz result' });
+    }
     res.json({ correct: result.correct, total: result.total, percent: result.percent });
+  } catch (e) {
+    res.status(500).json({ error: e.message || 'Internal error' });
+  }
+});
+
+r.get('/quiz-attempts/me', requireAuth, requireRole('student'), async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('quiz_attempts')
+      .select(
+        `
+        id,
+        quiz_id,
+        course_id,
+        correct,
+        total,
+        percent,
+        submitted_at,
+        course_quizzes ( title ),
+        courses ( title, slug )
+      `,
+      )
+      .eq('student_id', req.user.id)
+      .order('submitted_at', { ascending: false })
+      .limit(500);
+    if (error) return res.status(500).json({ error: error.message });
+    const attempts = (data || []).map((row) => ({
+      id: row.id,
+      quiz_id: row.quiz_id,
+      course_id: row.course_id,
+      correct: row.correct,
+      total: row.total,
+      percent: row.percent,
+      submitted_at: row.submitted_at,
+      quiz_title: row.course_quizzes?.title ?? null,
+      course_title: row.courses?.title ?? null,
+      course_slug: row.courses?.slug ?? null,
+    }));
+    res.json(attempts);
   } catch (e) {
     res.status(500).json({ error: e.message || 'Internal error' });
   }

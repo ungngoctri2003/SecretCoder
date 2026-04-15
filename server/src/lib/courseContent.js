@@ -85,3 +85,16 @@ export async function scoreQuizSubmission(quizId, courseId, answers) {
   const percent = total === 0 ? 0 : Math.round((correct / total) * 100);
   return { correct, total, percent };
 }
+
+export async function insertQuizAttempt(studentId, quizId, courseId, scores) {
+  const { correct, total, percent } = scores;
+  const { error } = await supabaseAdmin.from('quiz_attempts').insert({
+    student_id: studentId,
+    quiz_id: quizId,
+    course_id: courseId,
+    correct,
+    total,
+    percent,
+  });
+  if (error) throw new Error(error.message);
+}

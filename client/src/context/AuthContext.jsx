@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { AuthContext } from './auth-context';
 
@@ -7,12 +7,14 @@ export function AuthProvider({ children }) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(false);
+  const profileRequestId = useRef(0);
 
   const loadProfile = useCallback(async (userId) => {
+    const reqId = ++profileRequestId.current;
     if (!userId) {
       setProfile(null);
       setProfileLoading(false);
-      return;
+      return null;
     }
     setProfileLoading(true);
     const PROFILE_MS = 15000;
@@ -24,14 +26,20 @@ export function AuthProvider({ children }) {
           setTimeout(() => resolve({ data: null, error: { message: 'Profile load timeout' } }), PROFILE_MS),
         ),
       ]);
+      if (profileRequestId.current !== reqId) {
+        return error ? null : data;
+      }
       if (error) {
         console.warn('Profile load:', error.message || error);
         setProfile(null);
-      } else {
-        setProfile(data);
+        return null;
       }
+      setProfile(data);
+      return data;
     } finally {
-      setProfileLoading(false);
+      if (profileRequestId.current === reqId) {
+        setProfileLoading(false);
+      }
     }
   }, []);
 
@@ -73,7 +81,9 @@ export function AuthProvider({ children }) {
       if (s?.user?.id) {
         await loadProfile(s.user.id);
       } else {
+        profileRequestId.current += 1;
         setProfile(null);
+        setProfileLoading(false);
       }
     });
 
@@ -95,8 +105,8 @@ export function AuthProvider({ children }) {
         if (error) throw error;
         // Apply session immediately so navigate() after login sees a session (onAuthStateChange can lag one tick).
         setSession(data.session ?? null);
-        await loadProfile(data.user?.id ?? null);
-        return data;
+        const profileRow = await loadProfile(data.user?.id ?? null);
+        return { data, profile: profileRow };
       },
       async signUp(email, password, fullName) {
         const { data, error } = await supabase.auth.signUp({
@@ -105,16 +115,19 @@ export function AuthProvider({ children }) {
           options: { data: { full_name: fullName || '' } },
         });
         if (error) throw error;
+        let profileRow = null;
         if (data.session) {
           setSession(data.session);
-          await loadProfile(data.user?.id ?? null);
+          profileRow = await loadProfile(data.user?.id ?? null);
         }
-        return data;
+        return { data, profile: profileRow };
       },
       async signOut() {
+        profileRequestId.current += 1;
         await supabase.auth.signOut();
         setSession(null);
         setProfile(null);
+        setProfileLoading(false);
       },
     }),
     [session, profile, loading, profileLoading, loadProfile],
