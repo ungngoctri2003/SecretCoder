@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useReducedMotion } from 'framer-motion';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   Alert,
@@ -22,6 +23,7 @@ import { BookOpen, ChevronRight, ClipboardList, ListVideo } from 'lucide-react';
 import { PageHeader } from '../components/PageHeader';
 import { apiFetch } from '../lib/api';
 import { useAuth } from '../context/useAuth';
+import { ImageReveal, ScrollSection } from '../motion/ScrollBlock';
 import { COURSE_DETAIL } from '../strings/vi';
 import { COMMON } from '../strings/vi';
 import { ERR } from '../strings/vi';
@@ -49,6 +51,7 @@ export function CourseDetail() {
   const [nonStudentDialogOpen, setNonStudentDialogOpen] = useState(false);
   const [learnTab, setLearnTab] = useState(0);
   const autoEnrollRunning = useRef(false);
+  const reduce = useReducedMotion() ?? false;
 
   const isStudent = profile?.role === 'student';
   const courseId = course?.id;
@@ -282,13 +285,20 @@ export function CourseDetail() {
       <PageHeader title={course.title} crumbs={[{ label: COURSE_DETAIL.CRUMB, to: '/courses' }, { label: course.title, active: true }]} />
       <div className="container mx-auto max-w-6xl px-4 py-16">
         <div className="grid gap-10 md:grid-cols-2">
-          <Box
-            className="overflow-hidden rounded-2xl"
-            sx={{ border: 1, borderColor: 'divider', boxShadow: (t) => t.shadows[3] }}
-          >
-            <Box component="img" src={course.thumbnail_url || '/img/course-1.png'} alt="" sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          </Box>
-          <div>
+          <ImageReveal reduced={reduce} className="min-w-0">
+            <Box
+              className="h-full min-h-0 overflow-hidden rounded-2xl"
+              sx={{ border: 1, borderColor: 'divider', boxShadow: (t) => t.shadows[3] }}
+            >
+              <Box
+                component="img"
+                src={course.thumbnail_url || '/img/course-1.png'}
+                alt=""
+                sx={{ width: '100%', height: '100%', minHeight: 200, objectFit: 'cover', display: 'block' }}
+              />
+            </Box>
+          </ImageReveal>
+          <ScrollSection reduced={reduce} className="min-w-0">
             <h2 className="font-display text-3xl font-bold text-primary">{course.title}</h2>
             <p className="mt-4 text-base-content/80">{course.description || COURSE_DETAIL.NO_DESC}</p>
             <p className="mt-4 text-sm text-base-content/70">
@@ -317,19 +327,18 @@ export function CourseDetail() {
                 </Button>
               )}
             </Stack>
-          </div>
+          </ScrollSection>
         </div>
 
         <Divider sx={{ my: 6 }} />
 
+        <ScrollSection reduced={reduce} className="mx-auto w-full max-w-[920px]">
         <Box
           id="course-learn"
           component="section"
           sx={{
             scrollMarginTop: { xs: 72, md: 96 },
             mb: 6,
-            maxWidth: 920,
-            mx: 'auto',
             width: 1,
           }}
         >
@@ -724,6 +733,7 @@ export function CourseDetail() {
             </Box>
           </Paper>
         </Box>
+        </ScrollSection>
       </div>
 
       <Dialog open={enrollDialogOpen} onClose={() => setEnrollDialogOpen(false)} maxWidth="sm" fullWidth>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import {
   Accordion,
   AccordionDetails,
@@ -27,7 +28,23 @@ import { CourseCatalogCard } from '../components/CourseCatalogCard';
 import { TeamMemberGrid } from '../components/TeamMemberGrid';
 import { VI_TEAM_TEACHERS } from '../data/viTeamTeachers';
 import { apiFetch } from '../lib/api';
+import {
+  EASE_NAV,
+  getHeroBg,
+  getHeroStaggerRoot,
+  getHomeHeroSectionProps,
+  heroBlock,
+  heroLine,
+  imageReveal,
+  sectionInView,
+  sectionInViewDramatic,
+  staggerGrid,
+  staggerItem,
+} from '../motion/variants';
 import { COURSES_PAGE, ERR, HOME, TEAM_PAGE } from '../strings/vi';
+
+const MotionBox = motion.create(Box);
+const inView = { once: true, amount: 0.2 };
 
 const slides = [
   {
@@ -77,10 +94,17 @@ export function Home() {
   const [categoriesPreview, setCategoriesPreview] = useState([]);
   const [featuredCourses, setFeaturedCourses] = useState([]);
   const [catalogErr, setCatalogErr] = useState('');
+  const [strongHeroEntry, setStrongHeroEntry] = useState(true);
+  const reduceMotion = useReducedMotion() ?? false;
 
   useEffect(() => {
     const t = window.setInterval(() => setIndex((i) => (i + 1) % slides.length), 6500);
     return () => window.clearInterval(t);
+  }, []);
+
+  useEffect(() => {
+    const id = window.setTimeout(() => setStrongHeroEntry(false), 4200);
+    return () => window.clearTimeout(id);
   }, []);
 
   useEffect(() => {
@@ -128,134 +152,268 @@ export function Home() {
   const prev = () => setIndex((i) => (i - 1 + slides.length) % slides.length);
   const next = () => setIndex((i) => (i + 1) % slides.length);
 
+  const hLine = heroLine(reduceMotion);
+  const hBlock = heroBlock(reduceMotion);
+  const sec = sectionInView(reduceMotion);
+  const sGrid = staggerGrid(reduceMotion);
+  const sItem = staggerItem(reduceMotion);
+  const imgRe = imageReveal(reduceMotion);
+  const secDram = sectionInViewDramatic(reduceMotion);
+  const heroStagger = getHeroStaggerRoot(reduceMotion, { strongEntry: strongHeroEntry });
+
   return (
     <>
-      <Box
+      <MotionBox
         component="section"
         className="relative mb-8 overflow-hidden"
         sx={{ minHeight: { xs: 480, md: 600 } }}
+        {...getHomeHeroSectionProps(reduceMotion)}
       >
-        <Box component="img" src={slide.image} alt="" sx={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-        <Box
-          className="absolute inset-0"
-          sx={{
+        <AnimatePresence mode="wait" initial={false}>
+          <MotionBox
+            key={index}
+            component="div"
+            className="absolute inset-0"
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            variants={getHeroBg(reduceMotion)}
+          >
+            <motion.img
+              key={slide.image}
+              src={slide.image}
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover"
+              initial={reduceMotion ? false : { scale: 1.14, filter: 'brightness(0.75)' }}
+              animate={{ scale: 1, filter: 'brightness(1)' }}
+              transition={{ duration: 1.2, ease: EASE_NAV }}
+            />
+          </MotionBox>
+        </AnimatePresence>
+        {!reduceMotion && (
+          <>
+            <motion.div
+              className="pointer-events-none absolute -right-32 top-0 z-[1] h-72 w-72 rounded-full bg-primary/25 blur-3xl"
+              aria-hidden
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 0.5, scale: 1 }}
+              transition={{ duration: 1.4, ease: EASE_NAV, delay: 0.2 }}
+            />
+            <motion.div
+              className="pointer-events-none absolute -left-24 bottom-0 z-[1] h-64 w-64 rounded-full bg-white/10 blur-3xl"
+              aria-hidden
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.4 }}
+              transition={{ duration: 1.1, delay: 0.35, ease: EASE_NAV }}
+            />
+            <motion.div
+              className="pointer-events-none absolute left-1/2 top-1/3 z-[1] h-40 w-40 -translate-x-1/2 rounded-full bg-primary/15 blur-2xl"
+              aria-hidden
+              animate={{ y: [0, -12, 0] }}
+              transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+            />
+          </>
+        )}
+        <motion.div
+          className="pointer-events-none absolute inset-0 z-[1]"
+          style={{
             background: 'linear-gradient(to right, color-mix(in oklab, var(--color-base-content) 85%, transparent), color-mix(in oklab, var(--color-base-content) 50%, transparent))',
           }}
+          initial={reduceMotion ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.65, delay: 0.08, ease: EASE_NAV }}
         />
         <Box
-          className="relative z-10 mx-auto flex max-w-6xl flex-col justify-center px-4 py-16"
+          className="relative z-10 mx-auto max-w-6xl px-4 py-16"
           sx={{ minHeight: { xs: 480, md: 600 } }}
         >
-          <Typography
-            component="p"
-            className="mb-3 text-sm font-semibold uppercase tracking-wider"
-            sx={{ color: 'primary.main' }}
+          <motion.div
+            key={index}
+            className="flex h-full min-h-0 flex-col justify-center"
+            initial="hidden"
+            animate="visible"
+            variants={heroStagger}
           >
-            {slide.kicker}
-          </Typography>
-          <Typography
-            component="h1"
-            className="font-display font-bold leading-tight text-base-100 md:text-5xl"
-            sx={{ fontSize: { xs: '2.25rem', md: '3rem' }, maxWidth: { lg: '48rem' } }}
-          >
-            {slide.title}
-          </Typography>
-          <Typography component="p" className="mt-4 max-w-2xl text-lg" sx={{ color: 'rgba(255,255,255,0.9)' }}>
-            {slide.text}
-          </Typography>
-          <Box className="mt-8 flex flex-wrap gap-3">
-            <Button component={Link} to={slide.primary.to} variant="contained" color="primary" size="large">
-              {slide.primary.label}
-            </Button>
-            {slide.secondary ? (
-              <Button
-                component={Link}
-                to={slide.secondary.to}
-                variant="outlined"
-                size="large"
-                sx={{
-                  borderColor: 'rgba(255,255,255,0.85)',
-                  color: 'primary.contrastText',
-                  '&:hover': { borderColor: '#fff', bgcolor: 'rgba(255,255,255,0.12)', color: 'text.primary' },
-                }}
-              >
-                {slide.secondary.label}
+            <MotionBox
+              component="p"
+              variants={hLine}
+              className="mb-3 text-sm font-semibold uppercase tracking-wider"
+              sx={{ color: 'primary.main' }}
+            >
+              {slide.kicker}
+            </MotionBox>
+            <MotionBox
+              component="h1"
+              variants={hLine}
+              className="font-display font-bold leading-tight text-white md:text-5xl"
+              sx={{ fontSize: { xs: '2.25rem', md: '3rem' }, maxWidth: { lg: '48rem' } }}
+            >
+              {slide.title}
+            </MotionBox>
+            <MotionBox
+              component="p"
+              variants={hLine}
+              className="mt-4 max-w-2xl text-lg"
+              sx={{ color: 'rgba(255,255,255,0.9)' }}
+            >
+              {slide.text}
+            </MotionBox>
+            <MotionBox component="div" variants={hBlock} className="mt-8 flex flex-wrap gap-3">
+              <Button component={Link} to={slide.primary.to} variant="contained" color="primary" size="large">
+                {slide.primary.label}
               </Button>
-            ) : null}
-          </Box>
+              {slide.secondary ? (
+                <Button
+                  component={Link}
+                  to={slide.secondary.to}
+                  variant="outlined"
+                  size="large"
+                  sx={{
+                    borderColor: 'rgba(255,255,255,0.85)',
+                    color: 'primary.contrastText',
+                    '&:hover': { borderColor: '#fff', bgcolor: 'rgba(255,255,255,0.12)', color: 'text.primary' },
+                  }}
+                >
+                  {slide.secondary.label}
+                </Button>
+              ) : null}
+            </MotionBox>
+          </motion.div>
         </Box>
-        <IconButton type="button" aria-label={HOME.PREV_SLIDE} onClick={prev} sx={{ ...carouselBtnSx, left: 8 }}>
-          <ChevronLeft className="h-8 w-8" />
-        </IconButton>
-        <IconButton type="button" aria-label={HOME.NEXT_SLIDE} onClick={next} sx={{ ...carouselBtnSx, right: 8 }}>
-          <ChevronRight className="h-8 w-8" />
-        </IconButton>
-        <Box className="absolute bottom-4 left-1/2 z-20 flex gap-2" sx={{ transform: 'translateX(-50%)' }}>
+        <motion.div
+          initial={reduceMotion ? false : { opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.55, duration: 0.45, ease: EASE_NAV }}
+          className="absolute z-20"
+          style={{ top: '50%', left: 8, transform: 'translateY(-50%)' }}
+        >
+          <IconButton type="button" aria-label={HOME.PREV_SLIDE} onClick={prev} sx={carouselBtnSx}>
+            <ChevronLeft className="h-8 w-8" />
+          </IconButton>
+        </motion.div>
+        <motion.div
+          initial={reduceMotion ? false : { opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.55, duration: 0.45, ease: EASE_NAV }}
+          className="absolute z-20"
+          style={{ top: '50%', right: 8, transform: 'translateY(-50%)' }}
+        >
+          <IconButton type="button" aria-label={HOME.NEXT_SLIDE} onClick={next} sx={carouselBtnSx}>
+            <ChevronRight className="h-8 w-8" />
+          </IconButton>
+        </motion.div>
+        <Box className="absolute bottom-8 left-1/2 z-20 flex gap-2" sx={{ transform: 'translateX(-50%)' }}>
           {slides.map((_, i) => (
-            <button
+            <motion.button
               key={i}
               type="button"
-              className="h-2 w-2 rounded-full transition-colors"
+              className="h-2.5 w-2.5 rounded-full transition-colors"
               style={{
                 background: i === index ? 'var(--mui-palette-primary-main)' : 'rgba(255,255,255,0.45)',
                 border: 'none',
                 cursor: 'pointer',
               }}
+              initial={reduceMotion ? false : { scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.4 + i * 0.08, type: 'spring', stiffness: 400, damping: 22 }}
               aria-label={HOME.GO_SLIDE(i + 1)}
               onClick={() => setIndex(i)}
             />
           ))}
         </Box>
-      </Box>
+        {!reduceMotion && (
+          <motion.div
+            className="absolute bottom-2 left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-0.5 text-white/45"
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1, duration: 0.5, ease: EASE_NAV }}
+            aria-hidden
+          >
+            <motion.div
+              animate={{ y: [0, 6, 0] }}
+              transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              <ChevronDown className="h-6 w-6" />
+            </motion.div>
+          </motion.div>
+        )}
+      </MotionBox>
 
       <section className="bg-[var(--mui-palette-background-default)] py-16">
-        <div className="container mx-auto max-w-6xl px-4 text-center">
-          <h2 className="font-display text-3xl font-bold text-base-content md:text-4xl">{HOME.FEATURES_TITLE}</h2>
-          <p className="mx-auto mt-3 max-w-2xl text-base-content/80">{HOME.FEATURES_SUB}</p>
-          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="container mx-auto max-w-6xl px-4">
+          <motion.div
+            className="text-center"
+            initial="hidden"
+            whileInView="visible"
+            viewport={inView}
+            variants={secDram}
+          >
+            <h2 className="font-display text-3xl font-bold text-base-content md:text-4xl">{HOME.FEATURES_TITLE}</h2>
+            <p className="mx-auto mt-3 max-w-2xl text-base-content/80">{HOME.FEATURES_SUB}</p>
+          </motion.div>
+          <motion.div
+            className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4"
+            initial="hidden"
+            whileInView="visible"
+            viewport={inView}
+            variants={sGrid}
+          >
             {featureCopy.map((item, i) => {
               const Icon = featureIcons[i];
               return (
-                <Paper
-                  key={item.title}
-                  elevation={0}
-                  className="h-full text-left"
-                  sx={{
-                    p: 3,
-                    height: '100%',
-                    transition: 'box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease',
-                    '&:hover': {
-                      transform: 'translateY(-2px)',
-                      boxShadow: (t) => t.shadows[3],
-                      borderColor: 'primary.main',
-                    },
-                  }}
-                >
-                  <Box
-                    className="mb-4 inline-flex rounded-xl p-3"
-                    sx={{ bgcolor: 'color-mix(in oklab, var(--mui-palette-primary-main) 12%, transparent)' }}
+                <motion.div key={item.title} variants={sItem} className="h-full min-h-0 text-left">
+                  <Paper
+                    elevation={0}
+                    className="h-full"
+                    sx={{
+                      p: 3,
+                      height: '100%',
+                      transition: 'box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease',
+                      '&:hover': {
+                        transform: 'translateY(-2px)',
+                        boxShadow: (t) => t.shadows[3],
+                        borderColor: 'primary.main',
+                      },
+                    }}
                   >
-                    <Icon className="h-7 w-7" style={{ color: 'var(--mui-palette-primary-main)' }} aria-hidden />
-                  </Box>
-                  <Typography component="h3" className="font-display text-lg font-bold text-base-content">
-                    {item.title}
-                  </Typography>
-                  <Typography component="p" className="mt-2 text-sm text-base-content/80">
-                    {item.text}
-                  </Typography>
-                </Paper>
+                    <Box
+                      className="mb-4 inline-flex rounded-xl p-3"
+                      sx={{ bgcolor: 'color-mix(in oklab, var(--mui-palette-primary-main) 12%, transparent)' }}
+                    >
+                      <Icon className="h-7 w-7" style={{ color: 'var(--mui-palette-primary-main)' }} aria-hidden />
+                    </Box>
+                    <Typography component="h3" className="font-display text-lg font-bold text-base-content">
+                      {item.title}
+                    </Typography>
+                    <Typography component="p" className="mt-2 text-sm text-base-content/80">
+                      {item.text}
+                    </Typography>
+                  </Paper>
+                </motion.div>
               );
             })}
-          </div>
+          </motion.div>
         </div>
       </section>
 
       <section className="container mx-auto max-w-6xl px-4 py-16">
         <div className="grid items-center gap-10 md:grid-cols-2">
-          <div className="relative aspect-[4/3] overflow-hidden rounded-2xl shadow-xl">
+          <motion.div
+            className="relative aspect-[4/3] overflow-hidden rounded-2xl shadow-xl"
+            initial="hidden"
+            whileInView="visible"
+            viewport={inView}
+            variants={imgRe}
+          >
             <Box component="img" src="/img/about.jpg" alt="" sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          </div>
-          <div>
+          </motion.div>
+          <motion.div
+            className="min-w-0"
+            initial="hidden"
+            whileInView="visible"
+            viewport={inView}
+            variants={secDram}
+          >
             <p className="text-sm font-semibold uppercase tracking-wide text-primary">{HOME.ABOUT_SECTION_KICKER}</p>
             <h2 className="font-display mt-2 text-3xl font-bold text-base-content md:text-4xl">{HOME.ABOUT_SECTION_H2}</h2>
             <p className="mt-4 text-base-content/85">{HOME.ABOUT_SECTION_P}</p>
@@ -270,81 +428,121 @@ export function Home() {
             <Button component={Link} to="/about" variant="contained" color="primary" size="large" sx={{ mt: 4 }}>
               {HOME.LEARN_MORE}
             </Button>
-          </div>
+          </motion.div>
         </div>
       </section>
 
       <section className="bg-[var(--mui-palette-background-default)] py-16">
         <div className="container mx-auto max-w-6xl px-4">
           <div className="grid items-center gap-10 md:grid-cols-2">
-            <div className="order-2 md:order-1">
+            <motion.div
+              className="order-2 min-w-0 md:order-1"
+              initial="hidden"
+              whileInView="visible"
+              viewport={inView}
+              variants={sec}
+            >
               <h2 className="font-display text-3xl font-bold text-base-content md:text-4xl">{HOME.PROGRAMS_CTA_H2}</h2>
               <p className="mt-4 text-base-content/85">{HOME.PROGRAMS_CTA_SUB}</p>
               <Button component={Link} to="/signup" variant="contained" color="primary" size="large" sx={{ mt: 4 }}>
                 {HOME.REGISTER_NOW}
               </Button>
-            </div>
-            <div className="relative order-1 aspect-[4/3] overflow-hidden rounded-2xl shadow-xl md:order-2">
+            </motion.div>
+            <motion.div
+              className="relative order-1 aspect-[4/3] overflow-hidden rounded-2xl shadow-xl md:order-2"
+              initial="hidden"
+              whileInView="visible"
+              viewport={inView}
+              variants={imgRe}
+            >
               <Box component="img" src="/img/ready.jpg" alt="" sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
       <section className="container mx-auto max-w-6xl px-4 py-16">
-        <div className="text-center">
-          <p className="text-sm font-semibold uppercase tracking-wide text-primary">{HOME.MAJORS_KICKER}</p>
-          <h2 className="font-display mt-2 text-3xl font-bold text-base-content md:text-4xl">{HOME.MAJORS_H2}</h2>
-        </div>
+        <motion.div
+          className="text-center"
+          initial="hidden"
+          whileInView="visible"
+          viewport={inView}
+          variants={sGrid}
+        >
+          <motion.p
+            className="text-sm font-semibold uppercase tracking-wide text-primary"
+            variants={sItem}
+          >
+            {HOME.MAJORS_KICKER}
+          </motion.p>
+          <motion.h2
+            className="font-display mt-2 text-3xl font-bold text-base-content md:text-4xl"
+            variants={sItem}
+          >
+            {HOME.MAJORS_H2}
+          </motion.h2>
+        </motion.div>
         {catalogErr ? (
           <Alert severity="error" sx={{ mt: 4 }} role="alert">
             {catalogErr}
           </Alert>
         ) : null}
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <motion.div
+          className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+          initial="hidden"
+          whileInView="visible"
+          viewport={inView}
+          variants={sGrid}
+        >
           {categoriesPreview.map((cat) => (
-            <Card
-              key={cat.id}
-              elevation={0}
-              sx={{
-                transition: 'box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease',
-                '&:hover': { boxShadow: (t) => t.shadows[3], transform: 'translateY(-2px)', borderColor: 'primary.main' },
-              }}
-            >
-              <CardActionArea component={Link} to="/courses" sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2, p: 2 }}>
-                {cat.image_url ? (
-                  <Box
-                    component="img"
-                    src={cat.image_url}
-                    alt=""
-                    sx={{ width: 52, height: 52, flexShrink: 0, borderRadius: 1.5, objectFit: 'contain' }}
-                  />
-                ) : (
-                  <Box
-                    sx={{
-                      width: 52,
-                      height: 52,
-                      flexShrink: 0,
-                      borderRadius: 1.5,
-                      bgcolor: 'action.hover',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      typography: 'caption',
-                      fontWeight: 700,
-                      color: 'text.secondary',
-                    }}
-                  >
-                    {cat.name?.slice(0, 2)}
-                  </Box>
-                )}
-                <Typography component="h3" className="font-display text-left text-base font-bold text-base-content">
-                  {cat.name}
-                </Typography>
-              </CardActionArea>
-            </Card>
+            <motion.div key={cat.id} variants={sItem} className="min-h-0">
+              <Card
+                elevation={0}
+                sx={{
+                  height: '100%',
+                  transition: 'box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease',
+                  '&:hover': { boxShadow: (t) => t.shadows[3], transform: 'translateY(-2px)', borderColor: 'primary.main' },
+                }}
+              >
+                <CardActionArea
+                  component={Link}
+                  to="/courses"
+                  sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2, p: 2, height: '100%' }}
+                >
+                  {cat.image_url ? (
+                    <Box
+                      component="img"
+                      src={cat.image_url}
+                      alt=""
+                      sx={{ width: 52, height: 52, flexShrink: 0, borderRadius: 1.5, objectFit: 'contain' }}
+                    />
+                  ) : (
+                    <Box
+                      sx={{
+                        width: 52,
+                        height: 52,
+                        flexShrink: 0,
+                        borderRadius: 1.5,
+                        bgcolor: 'action.hover',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        typography: 'caption',
+                        fontWeight: 700,
+                        color: 'text.secondary',
+                      }}
+                    >
+                      {cat.name?.slice(0, 2)}
+                    </Box>
+                  )}
+                  <Typography component="h3" className="font-display text-left text-base font-bold text-base-content">
+                    {cat.name}
+                  </Typography>
+                </CardActionArea>
+              </Card>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
         {!catalogErr && categoriesPreview.length === 0 ? (
           <p className="mt-8 text-center text-base-content/60">{COURSES_PAGE.EMPTY}</p>
         ) : null}
@@ -352,28 +550,64 @@ export function Home() {
 
       <section className="bg-[var(--mui-palette-background-default)] py-16">
         <div className="container mx-auto max-w-6xl px-4">
-          <div className="text-center">
-            <p className="text-sm font-semibold uppercase tracking-wide text-primary">{HOME.FEATURED_PROGRAMS_KICKER}</p>
-            <h2 className="font-display mt-2 text-3xl font-bold text-base-content md:text-4xl">{HOME.FEATURED_PROGRAMS_H2}</h2>
-          </div>
-          <div className="mt-10 grid gap-8 sm:grid-cols-2 xl:grid-cols-3">
+          <motion.div
+            className="text-center"
+            initial="hidden"
+            whileInView="visible"
+            viewport={inView}
+            variants={sGrid}
+          >
+            <motion.p
+              className="text-sm font-semibold uppercase tracking-wide text-primary"
+              variants={sItem}
+            >
+              {HOME.FEATURED_PROGRAMS_KICKER}
+            </motion.p>
+            <motion.h2
+              className="font-display mt-2 text-3xl font-bold text-base-content md:text-4xl"
+              variants={sItem}
+            >
+              {HOME.FEATURED_PROGRAMS_H2}
+            </motion.h2>
+          </motion.div>
+          <motion.div
+            className="mt-10 grid gap-8 sm:grid-cols-2 xl:grid-cols-3"
+            initial="hidden"
+            whileInView="visible"
+            viewport={inView}
+            variants={sGrid}
+          >
             {featuredCourses.map((course) => (
-              <CourseCatalogCard key={course.id} course={course} />
+              <motion.div key={course.id} variants={sItem} className="min-h-0">
+                <CourseCatalogCard course={course} />
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
           {!catalogErr && featuredCourses.length === 0 ? (
             <p className="mt-8 text-center text-base-content/60">{COURSES_PAGE.EMPTY}</p>
           ) : null}
-          <div className="mt-10 text-center">
+          <motion.div
+            className="mt-10 text-center"
+            initial="hidden"
+            whileInView="visible"
+            viewport={inView}
+            variants={sec}
+          >
             <Button component={Link} to="/courses" variant="contained" color="primary" size="large" sx={{ minWidth: 200 }}>
               {HOME.VIEW_ALL_COURSES}
             </Button>
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {teamPreview.length > 0 ? (
-        <section className="container mx-auto max-w-6xl px-4 py-16">
+        <motion.section
+          className="container mx-auto max-w-6xl px-4 py-16"
+          initial="hidden"
+          whileInView="visible"
+          viewport={inView}
+          variants={sec}
+        >
           <div className="text-center">
             <p className="text-sm font-semibold uppercase tracking-wide text-primary">{TEAM_PAGE.KICKER}</p>
             <h2 className="font-display mt-2 text-3xl font-bold text-base-content md:text-4xl">{TEAM_PAGE.H2}</h2>
@@ -384,7 +618,7 @@ export function Home() {
               {HOME.VIEW_ALL_TEAM}
             </Button>
           </div>
-        </section>
+        </motion.section>
       ) : null}
 
       <Box
@@ -395,12 +629,24 @@ export function Home() {
         <Box className="absolute inset-0" sx={{ bgcolor: 'color-mix(in oklab, var(--color-base-content) 75%, transparent)' }} />
         <div className="container relative z-10 mx-auto max-w-6xl px-4">
           <div className="grid items-center gap-10 md:grid-cols-2">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-2xl shadow-2xl">
+            <motion.div
+              className="relative aspect-[4/3] overflow-hidden rounded-2xl shadow-2xl"
+              initial="hidden"
+              whileInView="visible"
+              viewport={inView}
+              variants={imgRe}
+            >
               <img src="/img/banner-2.png" alt="" className="h-full w-full object-cover" />
-            </div>
-            <div>
+            </motion.div>
+            <motion.div
+              className="min-w-0"
+              initial="hidden"
+              whileInView="visible"
+              viewport={inView}
+              variants={sec}
+            >
               <h2 className="font-display text-3xl font-bold text-primary md:text-4xl">{HOME.INSTRUCTOR_TITLE}</h2>
-              <p className="mt-4 text-base-100/90">{HOME.INSTRUCTOR_TEXT}</p>
+              <p className="mt-4 text-white/90">{HOME.INSTRUCTOR_TEXT}</p>
               <Button
                 component={Link}
                 to="/instructor"
@@ -411,12 +657,18 @@ export function Home() {
               >
                 {HOME.START_TEACHING}
               </Button>
-            </div>
+            </motion.div>
           </div>
         </div>
       </Box>
 
-      <section className="container mx-auto max-w-3xl px-4 py-16">
+      <motion.section
+        className="container mx-auto max-w-3xl px-4 py-16"
+        initial="hidden"
+        whileInView="visible"
+        viewport={inView}
+        variants={sec}
+      >
         <h2 className="font-display text-center text-3xl font-bold text-base-content md:text-4xl">{HOME.FAQ_TITLE}</h2>
         <Box className="mt-8" sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
           {HOME.FAQ_ITEMS.map((item, i) => (
@@ -448,7 +700,7 @@ export function Home() {
             </Accordion>
           ))}
         </Box>
-      </section>
+      </motion.section>
     </>
   );
 }

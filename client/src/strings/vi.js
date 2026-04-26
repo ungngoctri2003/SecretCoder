@@ -12,6 +12,8 @@ export const NAV = {
   DASHBOARD: 'Bảng điều khiển',
   SIGN_OUT: 'Đăng xuất',
   SIGN_IN: 'Đăng nhập',
+  THEME_DARK: 'Chuyển sang giao diện tối',
+  THEME_LIGHT: 'Chuyển sang giao diện sáng',
 };
 
 /** Địa chỉ / SĐT / email hiển thị trên trang Liên hệ và footer. */

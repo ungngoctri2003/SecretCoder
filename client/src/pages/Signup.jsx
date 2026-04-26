@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import { toast } from 'sonner';
 import { Link, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import {
@@ -23,6 +24,9 @@ import { COMMON } from '../strings/vi';
 import { ERR } from '../strings/vi';
 import { NAV } from '../strings/vi';
 import { ROLE } from '../strings/vi';
+import { EASE_NAV } from '../motion/variants';
+
+const MotionCard = motion.create(Card);
 
 export function Signup() {
   const { signUp, session, loading, profile, profileLoading, signOut } = useAuth();
@@ -33,6 +37,7 @@ export function Signup() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const reduce = useReducedMotion() ?? false;
 
   if (!loading && session && profile && !profileLoading) {
     return <Navigate to={from} replace />;
@@ -85,10 +90,13 @@ export function Signup() {
 
   return (
     <AuthPageShell pageTitle={AUTH.SIGNUP_TITLE} crumbs={[{ label: AUTH.SIGNUP_CRUMB, active: true }]}>
-      <Card
+      <MotionCard
         component="form"
         onSubmit={onSubmit}
         elevation={0}
+        initial={reduce ? false : { opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={reduce ? { duration: 0 } : { duration: 0.4, ease: EASE_NAV }}
         sx={{
           width: '100%',
           maxWidth: 440,
@@ -205,7 +213,7 @@ export function Signup() {
             </Typography>
           </Stack>
         </CardContent>
-      </Card>
+      </MotionCard>
     </AuthPageShell>
   );
 }

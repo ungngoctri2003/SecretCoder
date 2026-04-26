@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import {
   AppBar,
@@ -11,8 +11,9 @@ import {
   useTheme,
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
-import { Menu as MenuIcon, X, User, LogOut, LayoutDashboard, ChevronDown } from 'lucide-react';
+import { Menu as MenuIcon, X, User, LogOut, LayoutDashboard, Moon, Sun } from 'lucide-react';
 import { useAuth } from '../context/useAuth';
+import { useColorMode } from '../context/ColorModeContext';
 import { NAV } from '../strings/vi';
 
 const navEase = 'cubic-bezier(0.33, 1, 0.68, 1)';
@@ -69,14 +70,42 @@ const signOutButtonSx = {
 
 export function Navbar() {
   const { profile, signOut } = useAuth();
+  const { mode, toggleColorMode } = useColorMode();
   const theme = useTheme();
   const isLg = useMediaQuery(theme.breakpoints.up('lg'));
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const dashPath =
     profile?.role === 'admin' ? '/dashboard/admin' : profile?.role === 'teacher' ? '/dashboard/teacher' : '/dashboard/student';
 
   const closeMobile = () => setMobileOpen(false);
+
+  const themeToggle = (
+    <IconButton
+      type="button"
+      color="inherit"
+      aria-label={mode === 'dark' ? NAV.THEME_LIGHT : NAV.THEME_DARK}
+      onClick={toggleColorMode}
+      sx={{
+        color: 'text.primary',
+        borderRadius: 2,
+        transition: `background-color 0.25s ${navEase}, transform 0.22s ${navEase}`,
+        '&:hover': {
+          bgcolor: (t) => alpha(t.palette.primary.main, 0.1),
+        },
+      }}
+    >
+      {mode === 'dark' ? <Sun className="h-[22px] w-[22px]" aria-hidden /> : <Moon className="h-[22px] w-[22px]" aria-hidden />}
+    </IconButton>
+  );
 
   const navItems = (
     <>
@@ -133,8 +162,11 @@ export function Navbar() {
         backdropFilter: 'blur(12px) saturate(1.2)',
         backgroundImage: (t) =>
           `linear-gradient(180deg, ${alpha(t.palette.background.paper, 0.98)} 0%, ${alpha(t.palette.background.paper, 0.88)} 100%)`,
-        boxShadow: (t) => `0 1px 0 ${alpha(t.palette.common.black, 0.04)}`,
-        transition: `border-color 0.35s ${navEase}, box-shadow 0.35s ${navEase}`,
+        boxShadow: (t) =>
+          scrolled
+            ? `0 4px 20px ${alpha(t.palette.common.black, t.palette.mode === 'dark' ? 0.45 : 0.1)}`
+            : `0 1px 0 ${alpha(t.palette.common.black, t.palette.mode === 'dark' ? 0.2 : 0.04)}`,
+        transition: `border-color 0.28s ${navEase}, box-shadow 0.28s ${navEase}`,
       }}
     >
       <Toolbar
@@ -202,46 +234,51 @@ export function Navbar() {
           </Button>
         </Box>
 
-        {!isLg && (
-          <IconButton
-            edge="end"
-            aria-label={mobileOpen ? NAV.CLOSE_MENU : NAV.OPEN_MENU}
-            aria-expanded={mobileOpen}
-            onClick={() => setMobileOpen((v) => !v)}
-            sx={{
-              color: 'text.primary',
-              borderRadius: 2,
-              transition: `background-color 0.25s ${navEase}, transform 0.22s ${navEase}`,
-              '&:hover': {
-                bgcolor: (t) => alpha(t.palette.primary.main, 0.08),
-                transform: 'scale(1.06)',
-              },
-            }}
-          >
-            {mobileOpen ? <X size={22} /> : <MenuIcon size={22} />}
-          </IconButton>
-        )}
-
         {isLg ? (
-          <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 0.75 }}>{navItems}</Box>
+          <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 0.75, flexShrink: 0 }}>
+            {navItems}
+            {themeToggle}
+          </Box>
         ) : (
-          <Collapse in={mobileOpen} timeout={280} unmountOnExit sx={{ width: '100%' }}>
-            <Box
-              sx={{
-                width: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'stretch',
-                gap: 0.5,
-                pb: 1,
-                borderTop: 1,
-                borderColor: 'divider',
-                pt: 1,
-              }}
-            >
-              {navItems}
+          <>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25, flexShrink: 0, ml: 'auto' }}>
+              <IconButton
+                type="button"
+                aria-label={mobileOpen ? NAV.CLOSE_MENU : NAV.OPEN_MENU}
+                aria-expanded={mobileOpen}
+                onClick={() => setMobileOpen((v) => !v)}
+                sx={{
+                  color: 'text.primary',
+                  borderRadius: 2,
+                  transition: `background-color 0.25s ${navEase}, transform 0.22s ${navEase}`,
+                  '&:hover': {
+                    bgcolor: (t) => alpha(t.palette.primary.main, 0.08),
+                    transform: 'scale(1.06)',
+                  },
+                }}
+              >
+                {mobileOpen ? <X size={22} /> : <MenuIcon size={22} />}
+              </IconButton>
+              {themeToggle}
             </Box>
-          </Collapse>
+            <Collapse in={mobileOpen} timeout={280} unmountOnExit sx={{ width: '100%' }}>
+              <Box
+                sx={{
+                  width: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'stretch',
+                  gap: 0.5,
+                  pb: 1,
+                  borderTop: 1,
+                  borderColor: 'divider',
+                  pt: 1,
+                }}
+              >
+                {navItems}
+              </Box>
+            </Collapse>
+          </>
         )}
       </Toolbar>
     </AppBar>

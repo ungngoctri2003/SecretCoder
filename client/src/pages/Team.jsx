@@ -1,13 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useReducedMotion } from 'framer-motion';
 import { Alert, Box } from '@mui/material';
 import { PageHeader } from '../components/PageHeader';
 import { TeamMemberGrid } from '../components/TeamMemberGrid';
+import { ScrollSection } from '../motion/ScrollBlock';
 import { VI_TEAM_TEACHERS } from '../data/viTeamTeachers';
 import { apiFetch } from '../lib/api';
 import { TEAM_PAGE } from '../strings/vi';
 import { ERR } from '../strings/vi';
 
 export function Team() {
+  const reduce = useReducedMotion() ?? false;
   const [members, setMembers] = useState([]);
   const [err, setErr] = useState('');
 
@@ -32,16 +35,20 @@ export function Team() {
     <>
       <PageHeader title={TEAM_PAGE.TITLE} crumbs={[{ label: TEAM_PAGE.CRUMB, active: true }]} />
       <div className="container mx-auto max-w-6xl px-4 py-16">
-        <div className="text-center">
+        <ScrollSection reduced={reduce} className="text-center">
           <p className="text-sm font-semibold uppercase tracking-wide text-primary">{TEAM_PAGE.KICKER}</p>
           <h2 className="font-display mt-2 text-3xl font-bold md:text-4xl">{TEAM_PAGE.H2}</h2>
-        </div>
+        </ScrollSection>
         {err ? (
           <Alert severity="error" sx={{ mt: 4 }}>
             {err}
           </Alert>
         ) : null}
-        <TeamMemberGrid members={displayMembers} />
+        <Box sx={{ mt: 4 }}>
+          <ScrollSection reduced={reduce}>
+            <TeamMemberGrid members={displayMembers} />
+          </ScrollSection>
+        </Box>
         {!err && displayMembers.length === 0 ? (
           <p className="mt-8 text-center text-base-content/60">{TEAM_PAGE.EMPTY}</p>
         ) : null}

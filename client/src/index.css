@@ -29,3 +29,25 @@
 @utility font-display {
   font-family: var(--font-display);
 }
+
+/* Dark: align Tailwind @theme marketing tokens with createAppTheme('dark') */
+html.dark {
+  --color-base-100: #181c24;
+  --color-base-200: #0f1218;
+  --color-base-300: #2a3140;
+  --color-base-content: #e8eaef;
+  --color-primary: #e8872a;
+  --color-primary-content: #0f1218;
+  --color-secondary: #8b9ab3;
+  --color-secondary-content: #0f1218;
+  --color-accent: #e8872a;
+  --color-accent-content: #0f1218;
+  --color-neutral: #8b95a8;
+  --color-neutral-content: #0f1218;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
