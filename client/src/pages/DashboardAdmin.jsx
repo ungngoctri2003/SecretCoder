@@ -63,6 +63,7 @@ import { newQuizFormRow as newQuizQuestion, quizFormRowsFromApi, buildQuizPayloa
 import { newLectureBlock, blocksFromLectureForForm, countLectureBlocks, normalizeBlocksForApi } from '../lib/lectureBlocksForm.js';
 import { AdminLectureBlocksEditor } from '../components/admin/AdminLectureBlocksEditor.jsx';
 import { DASH_ADMIN, PAYMENT, COMMON, ERR, DASH_TEACHER, TEAM_PAGE, TESTI_PAGE, CONTACT_PAGE } from '../strings/vi';
+import { formatVndFromPriceCents, priceCentsToVndInput, vndToPriceCents } from '../utils/money.js';
 
 function adminPayMethodLabel(m) {
   if (m === 'cash') return PAYMENT.METHOD_CASH;
@@ -212,6 +213,7 @@ const INITIAL_COURSE_FORM = {
   thumbnail_url: '/img/course-1.png',
   category_id: '',
   published: true,
+  price_vnd: '',
   duration_hours: '',
   level: DASH_ADMIN.LEVEL_DEFAULT,
   rating: '',
@@ -365,6 +367,7 @@ export function DashboardAdmin() {
     thumbnail_url: '/img/course-1.png',
     category_id: '',
     published: true,
+    price_vnd: '',
     duration_hours: '',
     level: DASH_ADMIN.LEVEL_DEFAULT,
   }));
@@ -426,6 +429,7 @@ export function DashboardAdmin() {
     slug: '',
     description: '',
     image_url: '',
+    price_vnd: '',
     teacher_id: '',
     status: 'active',
   });
@@ -1226,6 +1230,7 @@ export function DashboardAdmin() {
       slug: '',
       description: '',
       image_url: '',
+      price_vnd: '',
       teacher_id: teacherOptions[0]?.id || '',
       status: 'active',
     });
@@ -1240,6 +1245,7 @@ export function DashboardAdmin() {
       slug: row.slug || '',
       description: row.description || '',
       image_url: row.image_url || '',
+      price_vnd: priceCentsToVndInput(row.price_cents),
       teacher_id: row.teacher_id || '',
       status: row.status || 'active',
     });
@@ -1263,6 +1269,7 @@ export function DashboardAdmin() {
           name: classForm.name.trim(),
           description: classForm.description.trim() || null,
           image_url: classForm.image_url.trim() || null,
+          price_cents: vndToPriceCents(classForm.price_vnd),
           teacher_id: classForm.teacher_id,
           status: classForm.status,
         };
@@ -1274,6 +1281,7 @@ export function DashboardAdmin() {
           name: classForm.name.trim(),
           description: classForm.description.trim() || null,
           image_url: classForm.image_url.trim() || null,
+          price_cents: vndToPriceCents(classForm.price_vnd),
           teacher_id: classForm.teacher_id,
           status: classForm.status,
         };
@@ -1569,6 +1577,7 @@ export function DashboardAdmin() {
             thumbnail_url: courseForm.thumbnail_url || null,
             category_id: courseForm.category_id || null,
             published: courseForm.published,
+            price_cents: vndToPriceCents(courseForm.price_vnd),
             duration_hours: courseForm.duration_hours === '' ? null : Number(courseForm.duration_hours),
             level: courseForm.level || null,
             rating: courseForm.rating === '' ? null : Number(courseForm.rating),
@@ -1606,6 +1615,7 @@ export function DashboardAdmin() {
       thumbnail_url: c.thumbnail_url || '/img/course-1.png',
       category_id: c.category_id || '',
       published: !!c.published,
+      price_vnd: priceCentsToVndInput(c.price_cents),
       duration_hours: c.duration_hours != null && c.duration_hours !== '' ? String(c.duration_hours) : '',
       level: c.level || DASH_ADMIN.LEVEL_DEFAULT,
     });
@@ -1631,6 +1641,7 @@ export function DashboardAdmin() {
             thumbnail_url: courseEditForm.thumbnail_url?.trim() || null,
             category_id: courseEditForm.category_id || null,
             published: !!courseEditForm.published,
+            price_cents: vndToPriceCents(courseEditForm.price_vnd),
             duration_hours: courseEditForm.duration_hours === '' ? null : Number(courseEditForm.duration_hours),
             level: courseEditForm.level?.trim() || null,
           }),
@@ -2944,6 +2955,14 @@ export function DashboardAdmin() {
                             value={courseForm.thumbnail_url}
                             onChange={(e) => setCourseForm((f) => ({ ...f, thumbnail_url: e.target.value }))}
                           />
+                          <TextField
+                            size="small"
+                            label={DASH_ADMIN.LABEL_PRICE_VND}
+                            value={courseForm.price_vnd}
+                            onChange={(e) => setCourseForm((f) => ({ ...f, price_vnd: e.target.value }))}
+                            helperText={DASH_ADMIN.PRICE_VND_HELPER}
+                            inputProps={{ inputMode: 'numeric' }}
+                          />
                           <Box sx={{ display: 'grid', gap: 1.75, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' } }}>
                             <TextField
                               size="small"
@@ -3862,9 +3881,7 @@ export function DashboardAdmin() {
                             <TableCell>{row.student?.email || '\u2014'}</TableCell>
                             <TableCell>{row.courses?.title || '\u2014'}</TableCell>
                             <TableCell>
-                              {row.courses?.price_cents != null && row.courses.price_cents > 0
-                                ? `${(row.courses.price_cents / 100).toLocaleString('vi-VN')} \u20ab`
-                                : COMMON.FREE}
+                              {formatVndFromPriceCents(row.courses?.price_cents) || COMMON.FREE}
                             </TableCell>
                             <TableCell>{adminPayMethodLabel(row.payment_method)}</TableCell>
                             <TableCell sx={{ maxWidth: 200, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -3965,6 +3982,7 @@ export function DashboardAdmin() {
                           <TableCell sx={adminHeaderCellSx}>{DASH_ADMIN.PAYMENTS_TH_STUDENT}</TableCell>
                           <TableCell sx={adminHeaderCellSx}>{DASH_ADMIN.PAYMENTS_TH_EMAIL}</TableCell>
                           <TableCell sx={adminHeaderCellSx}>{DASH_ADMIN.PAYMENTS_TH_TARGET}</TableCell>
+                          <TableCell sx={adminHeaderCellSx}>{DASH_ADMIN.PAYMENTS_TH_AMOUNT}</TableCell>
                           <TableCell sx={adminHeaderCellSx}>{DASH_ADMIN.PAYMENTS_TH_METHOD}</TableCell>
                           <TableCell sx={adminHeaderCellSx}>{DASH_ADMIN.PAYMENTS_TH_NOTE}</TableCell>
                           <TableCell sx={adminHeaderCellSx}>{DASH_ADMIN.PAYMENTS_TH_DATE}</TableCell>
@@ -3980,6 +3998,9 @@ export function DashboardAdmin() {
                             <TableCell sx={{ fontWeight: 600 }}>{row.student?.full_name || '\u2014'}</TableCell>
                             <TableCell>{row.student?.email || '\u2014'}</TableCell>
                             <TableCell>{row.classes?.name || '\u2014'}</TableCell>
+                            <TableCell>
+                              {formatVndFromPriceCents(row.classes?.price_cents) || COMMON.FREE}
+                            </TableCell>
                             <TableCell>{adminPayMethodLabel(row.payment_method)}</TableCell>
                             <TableCell sx={{ maxWidth: 200, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                               {row.payment_note || '\u2014'}
@@ -4672,6 +4693,15 @@ export function DashboardAdmin() {
           />
           <TextField
             size="small"
+            label={DASH_ADMIN.LABEL_PRICE_VND}
+            value={courseEditForm.price_vnd}
+            onChange={(e) => setCourseEditForm((f) => ({ ...f, price_vnd: e.target.value }))}
+            helperText={DASH_ADMIN.PRICE_VND_HELPER}
+            inputProps={{ inputMode: 'numeric' }}
+            fullWidth
+          />
+          <TextField
+            size="small"
             label={DASH_ADMIN.LABEL_DURATION_H}
             value={courseEditForm.duration_hours}
             onChange={(e) => setCourseEditForm((f) => ({ ...f, duration_hours: e.target.value }))}
@@ -4817,6 +4847,15 @@ export function DashboardAdmin() {
             value={classForm.image_url}
             onChange={(e) => setClassForm((f) => ({ ...f, image_url: e.target.value }))}
             helperText={DASH_ADMIN.CLASS_IMAGE_HINT}
+            fullWidth
+          />
+          <TextField
+            size="small"
+            label={DASH_ADMIN.LABEL_PRICE_VND}
+            value={classForm.price_vnd}
+            onChange={(e) => setClassForm((f) => ({ ...f, price_vnd: e.target.value }))}
+            helperText={DASH_ADMIN.PRICE_VND_HELPER}
+            inputProps={{ inputMode: 'numeric' }}
             fullWidth
           />
           <FormControl size="small" fullWidth>

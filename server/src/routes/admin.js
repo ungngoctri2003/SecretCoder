@@ -27,6 +27,17 @@ function toLocalYMD(iso) {
   return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`;
 }
 
+/** Same storage as courses: display VND = value / 100; must be integer in 0..2^31-1 */
+function parsePriceCents(v) {
+  if (v === undefined || v === null) return { ok: true, value: 0 };
+  const n = typeof v === 'number' ? v : Number(v);
+  if (!Number.isFinite(n) || n < 0) return { ok: false, error: 'price_cents must be a non-negative integer' };
+  const rounded = Math.round(n);
+  if (Math.abs(n - rounded) > 1e-6) return { ok: false, error: 'price_cents must be a non-negative integer' };
+  if (rounded > 2147483647) return { ok: false, error: 'price_cents out of range' };
+  return { ok: true, value: rounded };
+}
+
 function slugifyClassSlug(slugInput, nameFallback) {
   const raw = slugInput && String(slugInput).trim() ? String(slugInput).trim() : String(nameFallback || 'lop').trim();
   const s = raw
@@ -622,7 +633,7 @@ r.get('/payments/classes', async (req, res) => {
       reviewed_at,
       reviewed_by,
       student:profiles!class_students_student_id_fkey ( id, full_name, email ),
-      classes ( id, name, slug )
+      classes ( id, name, slug, price_cents )
     `,
       { count: 'exact' },
     )
@@ -1174,6 +1185,8 @@ r.post('/classes', async (req, res) => {
   if (tprof.role !== 'teacher') return res.status(400).json({ error: 'teacher_id must be a teacher profile' });
   const baseSlug = slugifyClassSlug(slugRaw, name);
   const slug = await uniqueClassSlug(baseSlug);
+  const priceParse = parsePriceCents(body.price_cents);
+  if (!priceParse.ok) return res.status(400).json({ error: priceParse.error });
   const { data, error } = await supabaseAdmin
     .from('classes')
     .insert({
@@ -1184,6 +1197,7 @@ r.post('/classes', async (req, res) => {
       status: status && ['active', 'archived'].includes(status) ? status : 'active',
       starts_at: starts_at ?? null,
       ends_at: ends_at ?? null,
+      price_cents: priceParse.value,
       image_url:
         image_url === undefined || image_url === null
           ? null
@@ -1226,6 +1240,11 @@ r.patch('/classes/:id', async (req, res) => {
     if (tErr) return res.status(500).json({ error: tErr.message });
     if (!tprof) return res.status(400).json({ error: 'Teacher not found' });
     if (tprof.role !== 'teacher') return res.status(400).json({ error: 'teacher_id must be a teacher profile' });
+  }
+  if (req.body.price_cents !== undefined) {
+    const pc = parsePriceCents(req.body.price_cents);
+    if (!pc.ok) return res.status(400).json({ error: pc.error });
+    patch.price_cents = pc.value;
   }
   if (Object.keys(patch).length === 0) return res.status(400).json({ error: 'No valid fields' });
   const { data, error } = await supabaseAdmin

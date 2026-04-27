@@ -30,6 +30,7 @@ import { apiFetch } from '../lib/api';
 import { useAuth } from '../context/useAuth';
 import { ImageReveal, ScrollSection } from '../motion/ScrollBlock';
 import { COURSE_DETAIL, PAYMENT, COMMON, ERR } from '../strings/vi';
+import { formatVndFromPriceCentsOrFree } from '../utils/money.js';
 
 function stripEnrollSearch(pathname, search) {
   const sp = new URLSearchParams(search);
@@ -388,7 +389,8 @@ export function CourseDetail() {
             <p className="mt-4 text-base-content/80">{course.description || COURSE_DETAIL.NO_DESC}</p>
             <p className="mt-4 text-sm text-base-content/70">
               <strong>{COURSE_DETAIL.LEVEL}:</strong> {course.level || '—'} · <strong>{COURSE_DETAIL.DURATION}:</strong>{' '}
-              {course.duration_hours != null ? `${course.duration_hours} ${COMMON.HOURS}` : '—'}
+              {course.duration_hours != null ? `${course.duration_hours} ${COMMON.HOURS}` : '—'} ·{' '}
+              <strong>{COMMON.FEE_LABEL}:</strong> {formatVndFromPriceCentsOrFree(course.price_cents, COMMON.FREE)}
             </p>
             <Stack direction="row" flexWrap="wrap" useFlexGap spacing={1} sx={{ mt: 1.5, rowGap: 1 }}>
               {course.review_avg != null ? (
@@ -1029,6 +1031,9 @@ export function CourseDetail() {
       >
         <DialogTitle>{PAYMENT.DIALOG_TITLE}</DialogTitle>
         <DialogContent>
+          <Alert severity="info" sx={{ mb: 2 }}>
+            <strong>{COMMON.FEE_LABEL}:</strong> {formatVndFromPriceCentsOrFree(course.price_cents, COMMON.FREE)}
+          </Alert>
           <RadioGroup value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
             <FormControlLabel value="cash" control={<Radio />} label={PAYMENT.METHOD_CASH} />
             <FormControlLabel value="bank_transfer" control={<Radio />} label={PAYMENT.METHOD_BANK} />

@@ -29,6 +29,7 @@ import { useAuth } from '../context/useAuth';
 import { ImageReveal, ScrollSection } from '../motion/ScrollBlock';
 import { CLASS_DETAIL, COURSE_DETAIL, PAYMENT, COMMON, ERR } from '../strings/vi';
 import { classCoverUrl } from '../lib/classCoverUrl';
+import { formatVndFromPriceCentsOrFree } from '../utils/money.js';
 
 function stripEnrollSearch(pathname, search) {
   const sp = new URLSearchParams(search);
@@ -342,6 +343,9 @@ export function ClassDetail() {
           <ScrollSection reduced={reduce} className="min-w-0">
             <h2 className="font-display text-3xl font-bold text-primary">{klass.name}</h2>
             <p className="mt-4 text-base-content/80">{klass.description || CLASS_DETAIL.NO_DESC}</p>
+            <p className="mt-2 text-sm text-base-content/80">
+              <strong>{COMMON.FEE_LABEL}:</strong> {formatVndFromPriceCentsOrFree(klass.price_cents, COMMON.FREE)}
+            </p>
             <Stack direction="row" flexWrap="wrap" useFlexGap spacing={1} sx={{ mt: 1.5, rowGap: 1 }}>
               {teacherName ? (
                 <Chip
@@ -703,6 +707,9 @@ export function ClassDetail() {
       >
         <DialogTitle>{PAYMENT.DIALOG_TITLE}</DialogTitle>
         <DialogContent>
+          <Alert severity="info" sx={{ mb: 2 }}>
+            <strong>{COMMON.FEE_LABEL}:</strong> {formatVndFromPriceCentsOrFree(klass?.price_cents, COMMON.FREE)}
+          </Alert>
           <RadioGroup value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
             <FormControlLabel value="cash" control={<Radio />} label={PAYMENT.METHOD_CASH} />
             <FormControlLabel value="bank_transfer" control={<Radio />} label={PAYMENT.METHOD_BANK} />

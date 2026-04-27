@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { BadgeCheck, Clock, Star, Users, Gauge, ChevronRight } from 'lucide-react';
 import { Box, Card, CardActionArea, CardContent, CardMedia, Chip, Stack, Typography } from '@mui/material';
 import { CATALOG_BADGES, COURSES_PAGE, COMMON } from '../strings/vi';
+import { formatVndFromPriceCentsOrFree } from '../utils/money.js';
 
 /**
  * @param {{ course: object, paymentStatus?: string | null }} props
@@ -189,6 +190,12 @@ export function CourseCatalogCard({ course, paymentStatus = null }) {
               size="small"
               variant="outlined"
               sx={{ borderColor: 'divider' }}
+            />
+            <Chip
+              size="small"
+              variant="outlined"
+              label={formatVndFromPriceCentsOrFree(course.price_cents, COMMON.FREE)}
+              sx={{ borderColor: 'divider', fontWeight: 700 }}
             />
           </Stack>
           <Box

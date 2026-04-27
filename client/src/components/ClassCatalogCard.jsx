@@ -2,7 +2,8 @@ import { Link } from 'react-router-dom';
 import { BadgeCheck, Calendar, ChevronRight, Clock, GraduationCap, Users } from 'lucide-react';
 import { Box, Card, CardActionArea, CardContent, CardMedia, Chip, Stack, Typography } from '@mui/material';
 import { classCoverUrl } from '../lib/classCoverUrl';
-import { CATALOG_BADGES, CLASSES_PAGE } from '../strings/vi';
+import { CATALOG_BADGES, CLASSES_PAGE, COMMON } from '../strings/vi';
+import { formatVndFromPriceCentsOrFree } from '../utils/money.js';
 
 function fmtDate(iso) {
   if (!iso) return '—';
@@ -189,6 +190,12 @@ export function ClassCatalogCard({ klass, paymentStatus = null }) {
               size="small"
               variant="outlined"
               sx={{ borderColor: 'divider' }}
+            />
+            <Chip
+              size="small"
+              variant="outlined"
+              label={formatVndFromPriceCentsOrFree(klass.price_cents, COMMON.FREE)}
+              sx={{ borderColor: 'divider', fontWeight: 700 }}
             />
           </Stack>
           <Box
