@@ -1,9 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link as RouterLink, useSearchParams } from 'react-router-dom';
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
   Alert,
   Box,
   Button,
@@ -13,8 +10,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  LinearProgress,
-  Link as MuiLink,
+  Link,
   Paper,
   Stack,
   Table,
@@ -39,14 +35,14 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { ChevronDown, Award } from 'lucide-react';
+import { Award } from 'lucide-react';
 import { toast } from 'sonner';
 import { PageHeader } from '../components/PageHeader';
 import { AdminSectionCard } from '../components/admin/AdminSectionCard';
 import { useAuth } from '../context/useAuth';
 import { apiFetch, apiFetchBinary } from '../lib/api';
 import { classCoverUrl } from '../lib/classCoverUrl';
-import { COMMON, COURSE_DETAIL, DASH_STUDENT, ERR } from '../strings/vi';
+import { COMMON, DASH_STUDENT, ERR } from '../strings/vi';
 
 function mapClassRefundSubmitError(code) {
   if (code === 'REASON_TOO_SHORT') return DASH_STUDENT.REFUND_ERR_SHORT;
@@ -102,9 +98,6 @@ export function DashboardStudent() {
   const [refundMembershipId, setRefundMembershipId] = useState('');
   const [refundReason, setRefundReason] = useState('');
   const [refundSubmitting, setRefundSubmitting] = useState(false);
-  const [learnAccordionExpandedId, setLearnAccordionExpandedId] = useState(null);
-  const learnAccordionAutoOpenedRef = useRef(false);
-  const learnAccordionUserToggledRef = useRef(false);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const tab = useMemo(() => {
@@ -154,32 +147,6 @@ export function DashboardStudent() {
       cancelled = true;
     };
   }, [tab, session?.access_token]);
-
-  useEffect(() => {
-    learnAccordionAutoOpenedRef.current = false;
-    learnAccordionUserToggledRef.current = false;
-    setLearnAccordionExpandedId(null);
-  }, [session?.access_token]);
-
-  useEffect(() => {
-    if (learnLoading || rows.length === 0 || learnAccordionAutoOpenedRef.current || learnAccordionUserToggledRef.current) {
-      return;
-    }
-    for (const r of rows) {
-      const slug = r.courses?.slug;
-      if (!slug) continue;
-      const pack = learnBySlug[slug];
-      if (!pack) continue;
-      const nLec = pack.lectures?.length ?? 0;
-      const nQz = pack.quizzes?.length ?? 0;
-      if (nLec > 0 || nQz > 0) {
-        setLearnAccordionExpandedId(r.id);
-        learnAccordionAutoOpenedRef.current = true;
-        return;
-      }
-    }
-    learnAccordionAutoOpenedRef.current = true;
-  }, [learnLoading, rows, learnBySlug]);
 
   useEffect(() => {
     let cancelled = false;
@@ -399,15 +366,6 @@ export function DashboardStudent() {
     });
   }, [quizAttempts, classQuizAttempts]);
 
-  const latestAttemptByQuizId = useMemo(() => {
-    const map = new Map();
-    for (const a of allQuizAttempts) {
-      if (!a.quiz_id || map.has(a.quiz_id)) continue;
-      map.set(a.quiz_id, a);
-    }
-    return map;
-  }, [allQuizAttempts]);
-
   const quizAttemptStats = useMemo(() => {
     const n = allQuizAttempts.length;
     const avg = n === 0 ? 0 : Math.round(allQuizAttempts.reduce((s, a) => s + (a.percent ?? 0), 0) / n);
@@ -505,20 +463,25 @@ export function DashboardStudent() {
                 </TableCell>
                 <TableCell sx={{ py: 1.25 }}>
                   {a._kind === 'classroom' && a._slug && a.quiz_id && a._courseSlug ? (
-                    <MuiLink
-                      component={Link}
+                    <Link
+                      component={RouterLink}
                       to={`/courses/${encodeURIComponent(a._courseSlug)}/classroom/${encodeURIComponent(a._slug)}/quiz/${encodeURIComponent(a.quiz_id)}`}
                       fontWeight={600}
                       variant="body2"
                     >
                       {a.quiz_title || '—'}
-                    </MuiLink>
+                    </Link>
                   ) : a._kind === 'classroom' && a._slug && a.quiz_id ? (
                     <Typography variant="body2">{a.quiz_title || '—'}</Typography>
                   ) : a._kind === 'course' && a._slug && a.quiz_id ? (
-                    <MuiLink component={Link} to={`/courses/${a._slug}/quiz/${encodeURIComponent(a.quiz_id)}`} fontWeight={600} variant="body2">
+                    <Link
+                      component={RouterLink}
+                      to={`/courses/${a._slug}/quiz/${encodeURIComponent(a.quiz_id)}`}
+                      fontWeight={600}
+                      variant="body2"
+                    >
                       {a.quiz_title || '—'}
-                    </MuiLink>
+                    </Link>
                   ) : (
                     <Typography variant="body2">{a.quiz_title || '—'}</Typography>
                   )}
@@ -578,7 +541,13 @@ export function DashboardStudent() {
                 {DASH_STUDENT.LEAD}
               </Typography>
             </Box>
-            <Button component={Link} to="/courses" variant="contained" color="primary" sx={{ flexShrink: 0, alignSelf: { xs: 'stretch', sm: 'center' } }}>
+            <Button
+              component={RouterLink}
+              to="/courses"
+              variant="contained"
+              color="primary"
+              sx={{ flexShrink: 0, alignSelf: { xs: 'stretch', sm: 'center' } }}
+            >
               {DASH_STUDENT.CTA_BROWSE_COURSES}
             </Button>
           </Stack>
@@ -751,7 +720,7 @@ export function DashboardStudent() {
               <Typography color="text.secondary" variant="caption" sx={{ display: 'block', mt: 1 }}>
                 {DASH_STUDENT.CTA_BROWSE_CLASSES_HINT}
               </Typography>
-              <Button component={Link} to="/courses" variant="outlined" color="primary" sx={{ mt: 2 }}>
+              <Button component={RouterLink} to="/courses" variant="outlined" color="primary" sx={{ mt: 2 }}>
                 {DASH_STUDENT.CTA_BROWSE_CLASSES}
               </Button>
             </Paper>
@@ -871,207 +840,7 @@ export function DashboardStudent() {
         </Box>
 
         <Stack spacing={3} sx={{ mt: 3 }}>
-            <Box>
-              <Typography variant="h6" component="h2" sx={{ fontFamily: "'Outfit', ui-sans-serif, system-ui, sans-serif", fontWeight: 700 }}>
-                {DASH_STUDENT.SECTION_LEARN_BY_COURSE}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, maxWidth: 640 }}>
-                {DASH_STUDENT.SECTION_LEARN_BY_COURSE_SUB}
-              </Typography>
-              {learnLoading && hasEnrollments ? <LinearProgress sx={{ mt: 2, borderRadius: 1, height: 6 }} color="primary" /> : null}
-              {!hasEnrollments && !loadFailed ? (
-                <Typography color="text.secondary" variant="body2" sx={{ mt: 2 }}>
-                  {DASH_STUDENT.EMPTY_LEARN_HINT}
-                </Typography>
-              ) : null}
-              {!learnLoading && hasEnrollments && totals.lectures === 0 && totals.quizzes === 0 ? (
-                <Typography color="text.secondary" variant="body2" sx={{ mt: 2 }}>
-                  {DASH_STUDENT.EMPTY_LEARN_ALL}
-                </Typography>
-              ) : null}
-              {hasEnrollments ? (
-                <Stack spacing={1.5} sx={{ mt: 2 }}>
-                  {rows.map((r) => {
-                    const slug = r.courses?.slug;
-                    if (!slug) return null;
-                    const pack = learnBySlug[slug];
-                    const lectures = pack?.lectures || [];
-                    const quizzes = pack?.quizzes || [];
-                    const courseTitle = r.courses?.title || slug;
-                    return (
-                      <Accordion
-                        key={`acc-${r.id}`}
-                        expanded={learnAccordionExpandedId === r.id}
-                        onChange={(_, isExpanded) => {
-                          learnAccordionUserToggledRef.current = true;
-                          setLearnAccordionExpandedId(isExpanded ? r.id : null);
-                        }}
-                        disableGutters
-                        elevation={0}
-                        sx={{
-                          borderRadius: 2,
-                          border: 1,
-                          borderColor: 'divider',
-                          bgcolor: 'background.paper',
-                          '&:before': { display: 'none' },
-                          overflow: 'hidden',
-                        }}
-                      >
-                        <AccordionSummary
-                          expandIcon={<ChevronDown size={20} aria-hidden />}
-                          sx={{
-                            px: 2,
-                            minHeight: 56,
-                            '& .MuiAccordionSummary-content': { my: 1, alignItems: 'center', gap: 1, flexWrap: 'wrap' },
-                          }}
-                        >
-                          <Typography sx={{ fontWeight: 700, flex: '1 1 auto', minWidth: 0 }}>{courseTitle}</Typography>
-                          <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap onClick={(e) => e.stopPropagation()}>
-                            {lectures.length > 0 ? (
-                              <Chip size="small" variant="outlined" label={DASH_STUDENT.CHIP_LECTURES.replace('{n}', String(lectures.length))} />
-                            ) : null}
-                            {quizzes.length > 0 ? (
-                              <Chip size="small" variant="outlined" label={DASH_STUDENT.CHIP_QUIZZES.replace('{n}', String(quizzes.length))} />
-                            ) : null}
-                            {slug ? (
-                              <Button component={Link} to={`/courses/${slug}`} size="small" variant="text" color="primary" sx={{ fontWeight: 600 }}>
-                                {DASH_STUDENT.GO_STUDY}
-                              </Button>
-                            ) : null}
-                          </Stack>
-                        </AccordionSummary>
-                        <AccordionDetails sx={{ px: 2, pb: 2, pt: 0, bgcolor: (t) => alpha(t.palette.common.black, 0.02) }}>
-                          {learnLoading && !pack ? (
-                            <Typography variant="body2" color="text.secondary">
-                              {DASH_STUDENT.LOADING_LEARN}
-                            </Typography>
-                          ) : null}
-                          {!learnLoading && lectures.length === 0 && quizzes.length === 0 ? (
-                            <Typography variant="body2" color="text.secondary">
-                              {DASH_STUDENT.EMPTY_COURSE_CONTENT}
-                            </Typography>
-                          ) : null}
-                          {lectures.length > 0 ? (
-                            <Box>
-                              <Typography variant="subtitle2" color="text.primary" sx={{ fontWeight: 700 }}>
-                                {DASH_STUDENT.SUBHEAD_LECTURES}
-                              </Typography>
-                              <Stack spacing={0.75} sx={{ mt: 1 }}>
-                                {lectures.map((lec) => {
-                                  const nBlocks = Array.isArray(lec.blocks) ? lec.blocks.length : 0;
-                                  return (
-                                    <Box
-                                      key={lec.id}
-                                      sx={{
-                                        display: 'flex',
-                                        flexWrap: 'wrap',
-                                        alignItems: 'center',
-                                        justifyContent: 'space-between',
-                                        gap: 1,
-                                        py: 1,
-                                        px: 1.5,
-                                        borderRadius: 1.5,
-                                        bgcolor: 'background.paper',
-                                        border: 1,
-                                        borderColor: 'divider',
-                                      }}
-                                    >
-                                      <MuiLink
-                                        component={Link}
-                                        to={`/courses/${slug}#lectures-section`}
-                                        fontWeight={600}
-                                        underline="hover"
-                                        color="text.primary"
-                                        variant="body2"
-                                      >
-                                        {lec.title || '—'}
-                                      </MuiLink>
-                                      {nBlocks > 0 ? (
-                                        <Chip size="small" label={COURSE_DETAIL.LECTURE_PARTS.replace('{n}', String(nBlocks))} variant="outlined" />
-                                      ) : null}
-                                    </Box>
-                                  );
-                                })}
-                              </Stack>
-                            </Box>
-                          ) : null}
-                          {quizzes.length > 0 ? (
-                            <Box sx={{ mt: lectures.length > 0 ? 2.5 : 0 }}>
-                              <Typography variant="subtitle2" color="text.primary" sx={{ fontWeight: 700 }}>
-                                {DASH_STUDENT.SUBHEAD_QUIZZES}
-                              </Typography>
-                              <Stack spacing={0.75} sx={{ mt: 1 }}>
-                                {quizzes.map((quiz) => {
-                                  const nQ = Array.isArray(quiz.questions) ? quiz.questions.length : 0;
-                                  const last = latestAttemptByQuizId.get(quiz.id);
-                                  return (
-                                    <Box
-                                      key={quiz.id}
-                                      sx={{
-                                        display: 'flex',
-                                        flexWrap: 'wrap',
-                                        alignItems: 'center',
-                                        justifyContent: 'space-between',
-                                        gap: 1,
-                                        py: 1,
-                                        px: 1.5,
-                                        borderRadius: 1.5,
-                                        bgcolor: 'background.paper',
-                                        border: 1,
-                                        borderColor: 'divider',
-                                      }}
-                                    >
-                                      <Box sx={{ minWidth: 0 }}>
-                                        <MuiLink
-                                          component={Link}
-                                          to={`/courses/${slug}/quiz/${encodeURIComponent(quiz.id)}`}
-                                          fontWeight={600}
-                                          underline="hover"
-                                          color="text.primary"
-                                          variant="body2"
-                                        >
-                                          {quiz.title || '—'}
-                                        </MuiLink>
-                                        {quiz.description ? (
-                                          <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.25 }}>
-                                            {quiz.description}
-                                          </Typography>
-                                        ) : null}
-                                        {last ? (
-                                          <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.5 }}>
-                                            {DASH_STUDENT.QUIZ_LAST_SCORE}: {formatQuizScoreShort(last.correct, last.total, last.percent)}
-                                            {last.submitted_at ? ` · ${new Date(last.submitted_at).toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' })}` : ''}
-                                          </Typography>
-                                        ) : null}
-                                      </Box>
-                                      <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
-                                        {nQ > 0 ? (
-                                          <Chip size="small" label={COURSE_DETAIL.QUIZ_Q_COUNT.replace('{n}', String(nQ))} variant="outlined" />
-                                        ) : null}
-                                        {last ? (
-                                          <Chip
-                                            size="small"
-                                            color="primary"
-                                            variant="filled"
-                                            label={formatQuizScoreShort(last.correct, last.total, last.percent)}
-                                          />
-                                        ) : null}
-                                      </Stack>
-                                    </Box>
-                                  );
-                                })}
-                              </Stack>
-                            </Box>
-                          ) : null}
-                        </AccordionDetails>
-                      </Accordion>
-                    );
-                  })}
-                </Stack>
-              ) : null}
-            </Box>
-
-            {quizHistoryBlock}
+          {quizHistoryBlock}
         </Stack>
         </>
         ) : null}

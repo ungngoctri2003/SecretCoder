@@ -282,84 +282,33 @@ r.delete('/categories/:id', async (req, res) => {
 
 // Courses (admin full)
 r.get('/content-stats', async (_req, res) => {
-  const [coursesRes, lecturesRes, quizzesRes] = await Promise.all([
-    supabaseAdmin.from('courses').select('id, title, published, created_at'),
-    supabaseAdmin.from('course_lectures').select('course_id, created_at'),
-    supabaseAdmin.from('course_quizzes').select('course_id, created_at'),
+  const [coursesRes, classesRes] = await Promise.all([
+    supabaseAdmin.from('courses').select('id, title'),
+    supabaseAdmin.from('classes').select('course_id'),
   ]);
   if (coursesRes.error) return res.status(500).json({ error: coursesRes.error.message });
-  if (lecturesRes.error) return res.status(500).json({ error: lecturesRes.error.message });
-  if (quizzesRes.error) return res.status(500).json({ error: quizzesRes.error.message });
+  if (classesRes.error) return res.status(500).json({ error: classesRes.error.message });
 
   const courses = coursesRes.data || [];
-  const lectures = lecturesRes.data || [];
-  const quizzes = quizzesRes.data || [];
+  const classRows = classesRes.data || [];
 
-  const publishedCourses = courses.filter((c) => c.published).length;
-  const summary = {
-    totalCourses: courses.length,
-    publishedCourses,
-    draftCourses: courses.length - publishedCourses,
-    totalLectures: lectures.length,
-    totalQuizzes: quizzes.length,
-  };
-
-  const lectureByCourse = new Map();
-  for (const row of lectures) {
+  const classCountByCourse = new Map();
+  for (const row of classRows) {
     const id = row.course_id;
     if (!id) continue;
-    lectureByCourse.set(id, (lectureByCourse.get(id) || 0) + 1);
-  }
-  const quizByCourse = new Map();
-  for (const row of quizzes) {
-    const id = row.course_id;
-    if (!id) continue;
-    quizByCourse.set(id, (quizByCourse.get(id) || 0) + 1);
+    classCountByCourse.set(id, (classCountByCourse.get(id) || 0) + 1);
   }
 
   const byCourse = courses
     .map((c) => ({
       id: c.id,
       title: c.title || '—',
-      lectures: lectureByCourse.get(c.id) || 0,
-      quizzes: quizByCourse.get(c.id) || 0,
+      classes: classCountByCourse.get(c.id) || 0,
     }))
-    .sort((a, b) => b.lectures + b.quizzes - (a.lectures + a.quizzes))
-    .slice(0, 8);
+    .sort((a, b) => b.classes - a.classes || String(a.title).localeCompare(String(b.title), 'vi'))
+    .slice(0, 24);
 
-  const dayKeys = [];
-  const today = new Date();
-  today.setUTCHours(0, 0, 0, 0);
-  for (let i = 29; i >= 0; i -= 1) {
-    const d = new Date(today);
-    d.setUTCDate(d.getUTCDate() - i);
-    dayKeys.push(d.toISOString().slice(0, 10));
-  }
-  const timelineMap = new Map(dayKeys.map((k) => [k, { day: k, courses: 0, lectures: 0, quizzes: 0 }]));
-  for (const c of courses) {
-    if (!c.created_at) continue;
-    const key = new Date(c.created_at).toISOString().slice(0, 10);
-    const row = timelineMap.get(key);
-    if (row) row.courses += 1;
-  }
-  for (const row of lectures) {
-    if (!row.created_at) continue;
-    const key = new Date(row.created_at).toISOString().slice(0, 10);
-    const t = timelineMap.get(key);
-    if (t) t.lectures += 1;
-  }
-  for (const row of quizzes) {
-    if (!row.created_at) continue;
-    const key = new Date(row.created_at).toISOString().slice(0, 10);
-    const t = timelineMap.get(key);
-    if (t) t.quizzes += 1;
-  }
-  const timeline = [...timelineMap.values()].map((row) => {
-    const [, m, d] = row.day.split('-');
-    return { day: `${d}/${m}`, courses: row.courses, lectures: row.lectures, quizzes: row.quizzes };
-  });
-
-  res.json({ summary, byCourse, timeline });
+  res.json({ byCourse });
 });
 
 r.get('/courses/compact', async (_req, res) => {

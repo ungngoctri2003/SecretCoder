@@ -358,6 +358,7 @@ export function DashboardAdmin() {
   const [classesItems, setClassesItems] = useState([]);
   const [classTotal, setClassTotal] = useState(0);
   const [classMetrics, setClassMetrics] = useState(null);
+  const [contentStats, setContentStats] = useState(null);
   const [classDialogOpen, setClassDialogOpen] = useState(false);
   const [classEditingId, setClassEditingId] = useState(null);
   const [classForm, setClassForm] = useState({
@@ -468,6 +469,16 @@ export function DashboardAdmin() {
       byDaySeries: classMetrics.byDaySeries ?? [],
     };
   }, [classMetrics]);
+
+  const courseClassesChartData = useMemo(() => {
+    const rows = contentStats?.byCourse;
+    if (!Array.isArray(rows)) return [];
+    return rows.map((c) => {
+      const t = c.title || '—';
+      const name = t.length > 24 ? `${t.slice(0, 22)}…` : t;
+      return { name, classes: c.classes ?? 0 };
+    });
+  }, [contentStats]);
 
   const teamCmsAnalytics = useMemo(
     () => buildTeamCmsAnalytics(teamMetricsItems ?? [], DASH_ADMIN.CMS_ROLE_UNLABELED),
@@ -601,6 +612,12 @@ export function DashboardAdmin() {
     setClassMetrics(m);
   }, [token]);
 
+  const loadContentStats = useCallback(async () => {
+    if (!token) return;
+    const data = await apiFetch('/api/admin/content-stats', {}, token);
+    setContentStats(data);
+  }, [token]);
+
   const loadTeacherOptions = useCallback(async () => {
     if (!token) return;
     const data = await apiFetch('/api/admin/users?role=teacher&page=1&pageSize=200', {}, token);
@@ -686,8 +703,23 @@ export function DashboardAdmin() {
 
   const loadUsersCourses = useCallback(async () => {
     if (!token) return;
-    await Promise.all([loadUserMetrics(), loadUsersPage(), loadCategories(), loadCourseOptions(), loadCoursesPage()]);
-  }, [token, loadUserMetrics, loadUsersPage, loadCategories, loadCourseOptions, loadCoursesPage]);
+    await Promise.all([
+      loadUserMetrics(),
+      loadUsersPage(),
+      loadCategories(),
+      loadCourseOptions(),
+      loadCoursesPage(),
+      loadContentStats(),
+    ]);
+  }, [
+    token,
+    loadUserMetrics,
+    loadUsersPage,
+    loadCategories,
+    loadCourseOptions,
+    loadCoursesPage,
+    loadContentStats,
+  ]);
 
   const loadPaymentRefunds = useCallback(async () => {
     if (!token) return;
@@ -843,6 +875,11 @@ export function DashboardAdmin() {
     if (tab !== 'courses' || !token) return;
     void loadClassMetrics();
   }, [tab, token, loadClassMetrics]);
+
+  useEffect(() => {
+    if (tab !== 'courses' || !token) return;
+    void loadContentStats();
+  }, [tab, token, loadContentStats]);
 
   useEffect(() => {
     if (tab !== 'courses' || !token) return;
@@ -1035,6 +1072,7 @@ export function DashboardAdmin() {
       setClassDialogOpen(false);
       await loadClassesPage();
       await loadClassMetrics();
+      await loadContentStats();
     } catch (err) {
       toast.error(err.data?.error || err.message);
     }
@@ -1050,6 +1088,7 @@ export function DashboardAdmin() {
       }
       await loadClassesPage();
       await loadClassMetrics();
+      await loadContentStats();
     } catch (err) {
       toast.error(err.data?.error || err.message);
     }
@@ -1757,6 +1796,29 @@ export function DashboardAdmin() {
                 <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 720 }}>
                   {DASH_ADMIN.LEAD_COURSES}
                 </Typography>
+
+                <AdminSectionCard title={DASH_ADMIN.COURSE_STATS_SECTION}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2, maxWidth: 720 }}>
+                    {DASH_ADMIN.COURSE_STATS_CLASSES_CHART_LEAD}
+                  </Typography>
+                  <Paper elevation={0} sx={{ p: 2.5, borderRadius: 2, bgcolor: 'background.paper', minHeight: 320 }}>
+                    <ResponsiveContainer width="100%" height={340}>
+                      <BarChart data={courseClassesChartData} margin={{ top: 8, right: 8, left: 0, bottom: 64 }}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" tick={{ fontSize: 10 }} angle={-35} textAnchor="end" height={72} interval={0} />
+                        <YAxis allowDecimals={false} width={40} />
+                        <RechartsTooltip />
+                        <Bar
+                          dataKey="classes"
+                          name={DASH_ADMIN.CLASS_CHART_LEGEND_COUNT}
+                          fill={chartPrimary}
+                          radius={[4, 4, 0, 0]}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </Paper>
+                </AdminSectionCard>
+
                   <Box
                     sx={{
                       display: 'grid',

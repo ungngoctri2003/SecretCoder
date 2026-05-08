@@ -817,28 +817,16 @@ export function CourseDetail() {
               )}
             </p>
             <Stack direction="row" flexWrap="wrap" useFlexGap spacing={1} sx={{ mt: 1.5, rowGap: 1 }}>
-              {course.review_avg != null ? (
-                <Chip
-                  size="small"
-                  icon={<Star className="h-3.5 w-3.5" aria-hidden style={{ color: 'var(--mui-palette-warning-main)' }} />}
-                  label={`${COURSE_DETAIL.RATING}: ${course.review_avg}`}
-                  variant="outlined"
-                />
-              ) : null}
-              {Number(course.review_count) > 0 ? (
-                <Chip
-                  size="small"
-                  label={`${course.review_count} ${COURSE_DETAIL.REVIEW_VOTES}`}
-                  variant="outlined"
-                />
-              ) : null}
-              {course.enrollment_count != null && course.enrollment_count > 0 ? (
-                <Chip
-                  size="small"
-                  label={`${COURSE_DETAIL.ENROLLMENT_LABEL}: ${course.enrollment_count}`}
-                  variant="outlined"
-                />
-              ) : null}
+              <Chip
+                size="small"
+                icon={<GraduationCap className="h-3.5 w-3.5" aria-hidden />}
+                label={
+                  courseClassesLoading
+                    ? COMMON.LOADING
+                    : COURSE_DETAIL.CLASSES_OPEN_BADGE.replace('{n}', String(courseClasses.length))
+                }
+                variant="outlined"
+              />
             </Stack>
             {msg ? (
               <Alert severity={enrollOk ? 'success' : enrollPendingInfo ? 'info' : 'warning'} sx={{ mt: 2 }}>
